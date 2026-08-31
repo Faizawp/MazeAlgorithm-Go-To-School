@@ -105,24 +105,12 @@
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Kelas</label>
                     <select id="input-class" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none font-bold">
-                        <option value="7A">Kelas 7A</option>
-                        <option value="7B">Kelas 7B</option>
-                        <option value="7C">Kelas 7C</option>
-                        <option value="7D">Kelas 7D</option>
-                        <option value="8A">Kelas 8A</option>
-                        <option value="8B">Kelas 8B</option>
-                        <option value="8C">Kelas 8C</option>
-                        <option value="8D">Kelas 8D</option>
-                        <option value="8E">Kelas 8E</option>
-                        <option value="8F">Kelas 8F</option>
-                        <option value="8G">Kelas 8G</option>
-                        <option value="8H">Kelas 8H</option>
-                        <option value="8I">Kelas 8I</option>
-                        <option value="8J">Kelas 8J</option>
-                        <option value="8K">Kelas 8K</option>
-                        <option value="8L">Kelas 8L</option>
-                        <option value="8N">Kelas 8M</option>
-                        <option value="8N">Kelas 8N</option>
+                        <option value="VII-A">VII-A</option>
+                        <option value="VII-B">VII-B</option>
+                        <option value="VIII-A">VIII-A</option>
+                        <option value="VIII-B">VIII-B</option>
+                        <option value="IX-A">IX-A</option>
+                        <option value="IX-B">IX-B</option>
                     </select>
                 </div>
                 <button onclick="startGame()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transform transition active:scale-95">
@@ -158,7 +146,7 @@
         <div class="max-w-4xl mx-auto p-4 py-8 w-full">
             <div class="flex justify-between items-end mb-6">
                 <h1 class="text-3xl font-bold text-gray-800">🗺️ Level Map</h1>
-                <button onclick="showScreen('screen-login')" class="text-sm text-blue-600 font-bold hover:underline">Logout</button>
+                <button onclick="logout()" class="text-sm text-blue-600 font-bold hover:underline">Logout</button>
             </div>
             
             <div class="mb-6 bg-white p-4 rounded-2xl shadow-sm border">
@@ -336,7 +324,7 @@
 
     <script>
         // Masukkan URL Web App Google Apps Script Anda di sini!
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz11FfQoyNAAEA9neXFgRvQax9-WHo7zV4Ir2IsBMXPsZWQQCoSAjeq9v7SP3akftmvbg/exec";
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyyRo1k_-CUpAvNc9ssQ6ig0MoCq6tdTVcXrRCWoaTpTBijxAF6qqnUyhrvxAo0lMx1VA/exec";
 
         /* GAME DATA (25 LEVELS - Solvable Grid Fixed) */
         // S = Start, F = Finish, . = Jalan, W = Tembok/Pohon, B = Barikade(🚧), C = Checkpoint(📍), E = Bensin(⛽)
@@ -446,19 +434,20 @@
             // Jalankan auto-refresh setiap 5 detik (Simulasi Real-time Sinkronisasi Cloud)
             syncInterval = setInterval(fetchLeaderboardData, 5000); 
             
+            // Daftarkan event listener
+            document.getElementById('input-name').addEventListener('input', checkReturningUser);
+            document.getElementById('input-class').addEventListener('change', checkReturningUser);
+            
+            // Cek session login sebelumnya
             const activeUserId = sessionStorage.getItem('activeUser');
             if (activeUserId) {
-                // Cek cadangan lokal dulu
+                // Utamakan load dari backup lokal agar data utuh, jika tidak ada cari dari users array
                 let backup = JSON.parse(localStorage.getItem('roadToSchool_backup'));
                 if (backup && backup.id === activeUserId) {
                     currentUser = backup;
                     showScreen('screen-map');
-                    return;
                 }
             }
-            
-            document.getElementById('input-name').addEventListener('input', checkReturningUser);
-            document.getElementById('input-class').addEventListener('change', checkReturningUser);
         };
 
         function checkReturningUser() {
@@ -493,6 +482,7 @@
 
             let user = users.find(u => u.id === uniqueId);
             if (!user) {
+                // Pemain Baru
                 user = {
                     id: uniqueId,
                     name: name,
@@ -503,6 +493,9 @@
                     levelData: {} 
                 };
                 users.push(user);
+            } else {
+                // Pemain Lama (Failsafe agar levelData selalu berupa Object)
+                user.levelData = user.levelData || {};
             }
             
             currentUser = user;
@@ -511,10 +504,20 @@
             
             showScreen('screen-map');
         }
+        
+        function logout() {
+            sessionStorage.removeItem('activeUser');
+            currentUser = null;
+            showScreen('screen-login');
+            document.getElementById('input-name').value = ''; // Reset input field
+            checkReturningUser();
+        }
 
         async function saveDB() {
             if (!currentUser) return;
             
+            // Failsafe format data
+            currentUser.levelData = currentUser.levelData || {};
             localStorage.setItem('roadToSchool_backup', JSON.stringify(currentUser));
 
             if (GOOGLE_SHEET_URL && !GOOGLE_SHEET_URL.includes("ISI_DENGAN")) {
@@ -543,6 +546,11 @@
         }
 
         function renderMap() {
+            if (!currentUser) return;
+            
+            // Failsafe jika levelData undefined akibat kegagalan sinkronisasi sheet
+            currentUser.levelData = currentUser.levelData || {};
+            
             document.getElementById('map-player-name').innerText = currentUser.name;
             document.getElementById('map-player-class').innerText = currentUser.class;
             
@@ -1090,6 +1098,7 @@
 
         // Ekspos ke global namespace
         window.startGame = startGame;
+        window.logout = logout;
         window.showScreen = showScreen;
         window.initLevel = initLevel;
         window.addBlock = addBlock;
