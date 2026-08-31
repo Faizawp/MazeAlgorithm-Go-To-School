@@ -1,1118 +1,1154 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road To School: Algorithm Maze</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Fredoka', sans-serif;
-            background-color: #f0fdf4; /* Light green bg */
-            color: #1f2937;
-            user-select: none;
-            overflow-x: hidden;
-        }
-
-        /* Hide scrollbar for algorithm queue */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Game Grid Styles (Seamless Design) */
-        .game-grid {
-            display: grid;
-            gap: 0px; /* Gap 0 agar jalan menyambung sempurna */
-            background-color: #166534;
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-            margin: 0 auto;
-            position: relative; /* Untuk absolut positioning mobil */
-        }
-
-        .grid-cell {
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            position: relative;
-            background-color: #9ca3af; /* Jalan aspal */
-            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); /* Garis aspal tipis */
-        }
-
-        .cell-wall { 
-            background-color: #4ade80; /* Rumput hijau */
-            box-shadow: inset 0 0 0 1px #22c55e, inset -2px -2px 6px rgba(0,0,0,0.1); 
-            z-index: 1;
-        } 
-        .cell-start { background-color: #fde047; }
-        .cell-finish { background-color: #93c5fd; }
-        
-        /* Car SVG Wrapper & Animation */
-        #car {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: transform 0.2s ease; /* Transisi rotasi */
-            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
-            transform-origin: center center;
-        }
-
-        #car-inner {
-            width: 75%;
-            height: 75%;
-            transition: top 0.3s ease-in-out, left 0.3s ease-in-out; /* Transisi pergerakan maju */
-            position: absolute;
-        }
-
-        .executing-block {
-            transform: scale(1.1);
-            border-color: #3b82f6 !important;
-            background-color: #dbeafe !important;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-        }
-
-        /* Screen Management */
-        .screen { display: none; }
-        .screen.active { display: flex; flex-direction: column; }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col">
-
-    <!-- LOGIN SCREEN -->
-    <div id="screen-login" class="screen active min-h-screen items-center justify-center bg-gradient-to-br from-green-400 to-blue-500 p-4">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
-            <div class="text-6xl mb-4 animate-bounce">🚗</div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">ROAD TO SCHOOL</h1>
-            <p class="text-gray-500 mb-6 font-medium">"Susun Algoritmanya, Sampai ke Sekolah!"</p>
-            <p class="text-gray-500 mb-6 font-medium">Created By : Muhammad Faiz Al Hafizh Winof Putra, S.Pd</p>
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Road To School: Algorithm Maze</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
             
-            <!-- Welcome Back Notification -->
-            <div id="welcome-back" class="hidden mb-4 p-4 bg-green-100 rounded-xl border border-green-300">
-                <h3 class="font-bold text-green-700">👋 WELCOME BACK!</h3>
-                <p class="text-sm text-green-600" id="wb-info">Progress kamu ditemukan.</p>
-            </div>
+            body {
+                font-family: 'Fredoka', sans-serif;
+                background-color: #f0fdf4; /* Light green bg */
+                color: #1f2937;
+                user-select: none;
+                overflow-x: hidden;
+            }
 
-            <div class="space-y-4 text-left">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Nama Pemain</label>
-                    <input type="text" id="input-name" placeholder="Masukkan namamu..." class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none uppercase font-bold" maxlength="15">
+            /* Hide scrollbar for algorithm queue */
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+            /* Game Grid Styles - Seamless Design */
+            .game-grid {
+                display: grid;
+                gap: 0px; /* Seamless road */
+                background-color: #166534; /* Base dark green behind grid */
+                padding: 8px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+                margin: 0 auto;
+                position: relative; 
+            }
+
+            .grid-cell {
+                aspect-ratio: 1 / 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.6rem;
+                position: relative;
+                background-color: #9ca3af; /* Jalan aspal */
+                box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); /* Garis aspal tipis */
+            }
+
+            .cell-wall { 
+                background-color: #4ade80; /* Rumput hijau */
+                box-shadow: inset 0 0 0 1px #22c55e, inset -2px -2px 6px rgba(0,0,0,0.1); 
+                z-index: 1;
+            } 
+            .cell-start { background-color: #fde047; }
+            .cell-finish { background-color: #93c5fd; }
+            
+            /* Car Animation */
+            #car {
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10;
+                transition: transform 0.2s ease; /* Hanya transisi untuk Rotasi */
+                filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
+                transform-origin: center center;
+            }
+
+            #car-inner {
+                width: 75%;
+                height: 75%;
+                transition: top 0.3s ease-in-out, left 0.3s ease-in-out; /* Transisi untuk Pergerakan X/Y */
+                position: absolute;
+            }
+
+            .executing-block {
+                transform: scale(1.1);
+                border-color: #3b82f6 !important;
+                background-color: #dbeafe !important;
+                box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            }
+
+            /* Screen Management */
+            .screen { display: none; }
+            .screen.active { display: flex; flex-direction: column; }
+        </style>
+    </head>
+    <body class="min-h-screen flex flex-col">
+
+        <!-- LOGIN SCREEN -->
+        <div id="screen-login" class="screen active min-h-screen items-center justify-center bg-gradient-to-br from-green-400 to-blue-500 p-4 relative">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+                <div class="text-6xl mb-4 animate-bounce">🚗</div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">ROAD TO SCHOOL</h1>
+                <p class="text-gray-500 mb-6 font-medium">"Susun Algoritmanya, Sampai ke Sekolah!"</p>
+                
+                <div id="welcome-back" class="hidden mb-4 p-4 bg-green-100 rounded-xl border border-green-300 transition-all">
+                    <h3 class="font-bold text-green-700">👋 WELCOME BACK!</h3>
+                    <p class="text-sm text-green-600" id="wb-info">Progress kamu ditemukan.</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Kelas</label>
-                    <select id="input-class" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none font-bold">
-                        <option value="VII-A">VII-A</option>
-                        <option value="VII-B">VII-B</option>
-                        <option value="VIII-A">VIII-A</option>
-                        <option value="VIII-B">VIII-B</option>
-                        <option value="IX-A">IX-A</option>
-                        <option value="IX-B">IX-B</option>
-                    </select>
-                </div>
-                <button onclick="startGame()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transform transition active:scale-95">
-                    🚀 START JOURNEY
-                </button>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                    <button onclick="showLeaderboard()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 rounded-xl shadow transform transition active:scale-95">
+
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Nama Pemain</label>
+                        <input type="text" id="input-name" placeholder="Masukkan namamu..." class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none uppercase font-bold" maxlength="15">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Kelas</label>
+                        <select id="input-class" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none font-bold">
+                            <option value="7A">Kelas 7A</option>
+                            <option value="7B">Kelas 7B</option>
+                            <option value="7C">Kelas 7C</option>
+                            <option value="7D">Kelas 7D</option>
+                            <option value="8A">Kelas 8A</option>
+                            <option value="8B">Kelas 8B</option>
+                            <option value="8C">Kelas 8C</option>
+                            <option value="8D">Kelas 8D</option>
+                            <option value="8E">Kelas 8E</option>
+                            <option value="8F">Kelas 8F</option>
+                            <option value="8G">Kelas 8G</option>
+                            <option value="8H">Kelas 8H</option>
+                            <option value="8I">Kelas 8I</option>
+                            <option value="8J">Kelas 8J</option>
+                            <option value="8K">Kelas 8K</option>
+                            <option value="8L">Kelas 8L</option>
+                            <option value="8N">Kelas 8M</option>
+                            <option value="8N">Kelas 8N</option>
+                        </select>
+                    </div>
+                    <button onclick="startGame()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transform transition active:scale-95">
+                        🚀 START JOURNEY
+                    </button>
+                    <button onclick="showLeaderboard()" class="w-full mt-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 rounded-xl shadow transform transition active:scale-95">
                         🏆 LEADERBOARD
                     </button>
-                    <button onclick="showTeacherLogin()" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-3 rounded-xl shadow border border-purple-300 transform transition active:scale-95">
-                        👨‍🏫 GURU
-                    </button>
+                <div class="bg-white rounded-1 shadow-1 p-1 active:scale-95 transition mt-6">
+                    <p class="text-xs text-gray-500 text-center">Created by <a href="https://github.com/faizawp" target="_blank" class="text-blue-500 hover:underline">Muhammad Faiz Al Hafizh Winof Putra, S.Pd.</a></p>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAP SCREEN -->
-    <div id="screen-map" class="screen min-h-screen bg-gray-100">
-        <div class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-20">
-            <div class="max-w-4xl mx-auto flex justify-between items-center">
-                <div>
-                    <h2 class="text-xl font-bold uppercase" id="map-player-name">Player</h2>
-                    <p class="text-sm opacity-90 font-medium" id="map-player-class">Class</p>
                 </div>
-                <div class="text-right">
-                    <div class="font-bold text-yellow-300 text-lg">⭐ <span id="map-total-stars">0</span></div>
-                    <div class="text-sm font-medium">Score: <span id="map-total-score">0</span></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="max-w-4xl mx-auto p-4 py-8 w-full">
-            <div class="flex justify-between items-end mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">🗺️ Level Map</h1>
-                <button onclick="logout()" class="text-sm text-blue-600 font-bold hover:underline">Logout</button>
             </div>
             
-            <div class="mb-6 bg-white p-4 rounded-2xl shadow-sm border">
-                <div class="flex justify-between text-sm font-bold text-gray-600 mb-2">
-                    <span>JOURNEY PROGRESS</span>
-                    <span id="progress-text">0 / 25 LEVEL (0%)</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-4">
-                    <div id="progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-1000" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <div id="level-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                <!-- Levels injected here by JS -->
-            </div>
-        </div>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div id="screen-game" class="screen min-h-screen bg-gray-100 flex-col">
-        <!-- Header -->
-        <div class="bg-white shadow-sm p-3 flex justify-between items-center sticky top-0 z-20 border-b">
-            <button onclick="showScreen('screen-map')" class="bg-gray-100 hover:bg-gray-200 p-2 px-4 rounded-xl font-bold text-gray-700 shadow-sm">
-                ⬅️ Map
+            <!-- Admin Access Button at the bottom -->
+            <button onclick="openTeacherAccess()" class="absolute bottom-4 right-4 text-white/70 hover:text-white text-sm font-bold flex items-center gap-1 transition">
+                🔒 Teacher Access
             </button>
-            <div class="text-center">
-                <h2 class="text-xl font-bold text-gray-800" id="game-level-title">LEVEL 1</h2>
-                <p class="text-xs font-semibold text-blue-600" id="game-level-desc">Target: Reach School</p>
-            </div>
-            <div class="text-right text-sm font-bold text-gray-700 bg-gray-100 p-2 rounded-xl">
-                🔋 <span id="game-energy" class="text-green-600">∞</span><br>
-                ⭐ <span id="game-score" class="text-yellow-600">0</span>
-            </div>
         </div>
 
-        <!-- Main Game Area -->
-        <div class="flex-1 flex flex-col md:flex-row max-w-6xl mx-auto w-full p-2 gap-4 mt-2">
-            
-            <!-- Maze Container -->
-            <div class="flex-1 flex flex-col items-center justify-center p-2">
-                <!-- Legend -->
-                <div class="bg-white p-2 rounded-xl shadow-sm border mb-4 text-xs font-bold text-gray-600 flex gap-4 w-full max-w-sm justify-center">
-                    <div>🧭 ARAH MUTLAK:</div>
-                    <div class="text-blue-600">⬆️ Atas</div>
-                    <div class="text-blue-600">➡️ Kanan</div>
-                    <div class="text-blue-600">⬇️ Bawah</div>
-                    <div class="text-blue-600">⬅️ Kiri</div>
+        <!-- MAP SCREEN -->
+        <div id="screen-map" class="screen min-h-screen bg-gray-100">
+            <div class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-20">
+                <div class="max-w-4xl mx-auto flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold uppercase" id="map-player-name">Player</h2>
+                        <p class="text-sm opacity-90 font-medium" id="map-player-class">Class</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-yellow-300 text-lg">⭐ <span id="map-total-stars">0</span></div>
+                        <div class="text-sm font-medium">Score: <span id="map-total-score">0</span></div>
+                    </div>
                 </div>
-                
-                <!-- Game Board -->
-                <div id="game-board" class="game-grid">
-                    <!-- Grid generated by JS, Car appended here -->
-                </div>
-            </div>
-
-            <!-- Algorithm Panel -->
-            <div class="w-full md:w-80 bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-4 flex flex-col">
-                <h3 class="font-bold text-gray-800 mb-2 border-b pb-2 flex justify-between">
-                    <span>📝 ALGORITMA</span>
-                    <span id="algo-counter" class="text-gray-400 text-sm">0/45</span>
-                </h3>
-                
-                <!-- Queue -->
-                <div id="algorithm-queue" class="flex-1 min-h-[120px] max-h-[150px] md:max-h-none overflow-y-auto bg-gray-50 rounded-xl p-3 border-2 border-dashed border-gray-300 flex flex-wrap content-start gap-2 mb-4">
-                    <!-- Blocks go here -->
-                </div>
-
-                <!-- Controls -->
-                <div class="grid grid-cols-3 gap-2 mb-4">
-                    <button onclick="addBlock('UP')" class="col-start-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">⬆️</button>
-                    <button onclick="addBlock('LEFT')" class="col-start-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">⬅️</button>
-                    <button onclick="addBlock('DOWN')" class="col-start-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">⬇️</button>
-                    <button onclick="addBlock('RIGHT')" class="col-start-3 row-start-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">➡️</button>
-                </div>
-                
-                <!-- Special Blocks (Conditional) -->
-                <div id="special-blocks" class="grid grid-cols-2 gap-2 mb-4 hidden">
-                    <button onclick="addBlock('LOOP2')" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-1 rounded-xl border-2 border-purple-300 text-xs shadow-sm">🔁 Ulang 2x Sblmnya</button>
-                    <button onclick="addBlock('IF_BLOCK')" class="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-2 px-1 rounded-xl border-2 border-orange-300 text-xs shadow-sm">❓ Jika ⬆️ 🚧, ➡️</button>
-                </div>
-
-                <!-- Actions -->
-                <div class="grid grid-cols-2 gap-2 mt-auto">
-                    <button onclick="resetLevel()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-xl shadow border">↩ RESET</button>
-                    <button onclick="useHint()" class="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 font-bold py-3 rounded-xl shadow border border-yellow-300">💡 HINT</button>
-                    <button onclick="runAlgorithm()" id="btn-run" class="col-span-2 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-95 text-lg transition flex justify-center items-center gap-2 mt-2">
-                        ▶️ JALANKAN ALGORITMA
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- LEADERBOARD SCREEN -->
-    <div id="screen-leaderboard" class="screen min-h-screen bg-gray-100 p-4">
-        <div class="max-w-2xl mx-auto w-full">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">🏆 Leaderboard</h1>
-                <button onclick="showScreen('screen-login')" class="bg-white shadow-sm hover:bg-gray-50 px-5 py-2 rounded-xl font-bold text-gray-700 border">Kembali</button>
-            </div>
-            <div class="bg-white rounded-3xl shadow-xl border p-6">
-                <div id="leaderboard-list" class="space-y-3">
-                    <!-- Injected by JS -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TEACHER DASHBOARD SCREEN -->
-    <div id="screen-teacher" class="screen min-h-screen bg-gray-50 p-4">
-        <div class="max-w-4xl mx-auto w-full flex flex-col h-full">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">👨‍🏫 Teacher Dashboard</h1>
-                    <p class="text-gray-500 font-medium">Real-time Student Progress</p>
-                </div>
-                <button onclick="showScreen('screen-login')" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg font-bold text-gray-700">Logout</button>
             </div>
             
-            <div class="bg-white rounded-2xl shadow-lg border p-6 flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-700">Database Siswa (Real-time)</h2>
-                    <button onclick="downloadCSV()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl shadow transition flex items-center gap-2">
-                        📥 DOWNLOAD CSV
-                    </button>
+            <div class="max-w-4xl mx-auto p-4 py-8 w-full">
+                <div class="flex justify-between items-end mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800">🗺️ Level Map</h1>
+                    <button onclick="logout()" class="text-sm bg-gray-200 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg font-bold transition">Logout</button>
                 </div>
                 
-                <div class="overflow-x-auto flex-1 border rounded-xl">
-                    <table class="min-w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-gray-100 uppercase font-bold text-gray-600 border-b">
+                <div class="mb-6 bg-white p-4 rounded-2xl shadow-sm border">
+                    <div class="flex justify-between text-sm font-bold text-gray-600 mb-2">
+                        <span>JOURNEY PROGRESS</span>
+                        <span id="progress-text">0 / 25 LEVEL (0%)</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div id="progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="level-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                    <!-- Levels injected here by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="screen-game" class="screen min-h-screen bg-gray-50 flex-col">
+            <!-- Header -->
+            <div class="bg-white shadow-sm p-3 flex justify-between items-center sticky top-0 z-20 border-b">
+                <button onclick="showScreen('screen-map')" class="bg-gray-100 hover:bg-gray-200 p-2 px-4 rounded-xl font-bold text-gray-700 shadow-sm">
+                    ⬅️ Map
+                </button>
+                <div class="text-center">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800" id="game-level-title">LEVEL 1</h2>
+                    <p class="text-xs font-semibold text-blue-600" id="game-level-desc">Target: Reach School</p>
+                </div>
+                <div class="text-right text-sm font-bold text-gray-700 bg-gray-100 p-2 rounded-xl">
+                    🔋 <span id="game-energy" class="text-green-600">∞</span><br>
+                    ⭐ <span id="game-score" class="text-yellow-600">0</span>
+                </div>
+            </div>
+
+            <!-- Main Game Area -->
+            <div class="flex-1 flex flex-col md:flex-row max-w-6xl mx-auto w-full p-2 gap-4 mt-2">
+                
+                <!-- Maze Container -->
+                <div class="flex-1 flex flex-col items-center justify-center p-2">
+                    <!-- Legend -->
+                    <div class="bg-white p-2 rounded-xl shadow-sm border mb-4 text-xs font-bold text-gray-600 flex gap-4 w-full max-w-sm justify-center">
+                        <div>🧭 ARAH MUTLAK:</div>
+                        <div class="text-blue-600">⬆️ Atas</div>
+                        <div class="text-blue-600">➡️ Kanan</div>
+                        <div class="text-blue-600">⬇️ Bawah</div>
+                        <div class="text-blue-600">⬅️ Kiri</div>
+                    </div>
+                    
+                    <div id="game-board" class="game-grid">
+                        <!-- Grid generated by JS -->
+                        <div id="car">
+                            <div id="car-inner">
+                                <svg viewBox="0 0 100 100" class="w-full h-full">
+                                    <rect x="25" y="15" width="50" height="70" rx="12" fill="#ef4444" />
+                                    <rect x="30" y="35" width="40" height="25" rx="4" fill="#1f2937" />
+                                    <rect x="32" y="10" width="10" height="8" rx="2" fill="#fef08a" />
+                                    <rect x="58" y="10" width="10" height="8" rx="2" fill="#fef08a" />
+                                    <rect x="32" y="82" width="10" height="6" rx="2" fill="#991b1b" />
+                                    <rect x="58" y="82" width="10" height="6" rx="2" fill="#991b1b" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Algorithm Panel -->
+                <div class="w-full md:w-80 bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-4 flex flex-col">
+                    <h3 class="font-bold text-gray-800 mb-2 border-b pb-2 flex justify-between items-center">
+                        <span>📝 ALGORITMA</span>
+                        <span id="algo-counter" class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600">0/60</span>
+                    </h3>
+                    
+                    <!-- Queue -->
+                    <div id="algorithm-queue" class="flex-1 min-h-[120px] max-h-[150px] md:max-h-none overflow-y-auto bg-gray-50 rounded-xl p-3 border-2 border-dashed border-gray-300 flex flex-wrap content-start gap-2 mb-4">
+                        <!-- Blocks go here -->
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <button onclick="addBlock('UP')" class="col-start-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">⬆️</button>
+                        <button onclick="addBlock('LEFT')" class="col-start-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">⬅️</button>
+                        <button onclick="addBlock('DOWN')" class="col-start-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">⬇️</button>
+                        <button onclick="addBlock('RIGHT')" class="col-start-3 row-start-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold p-3 rounded-xl border-2 border-blue-300 transform active:scale-90 transition shadow-sm">➡️</button>
+                    </div>
+                    
+                    <!-- Special Blocks -->
+                    <div id="special-blocks" class="grid grid-cols-2 gap-2 mb-4 hidden">
+                        <button onclick="addBlock('LOOP2')" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-1 rounded-xl border-2 border-purple-300 text-xs shadow-sm">🔁 Ulang 2x Sblmnya</button>
+                        <button onclick="addBlock('IF_BLOCK')" class="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-2 px-1 rounded-xl border-2 border-orange-300 text-xs shadow-sm">❓ Jika ⬆️ 🚧, ➡️</button>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="grid grid-cols-2 gap-2 mt-auto">
+                        <button onclick="resetLevel()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-xl shadow border">↩ RESET</button>
+                        <button onclick="useHint()" class="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 font-bold py-3 rounded-xl shadow border border-yellow-300">💡 HINT</button>
+                        <button onclick="runAlgorithm()" id="btn-run" class="col-span-2 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-95 text-lg transition flex justify-center items-center gap-2 mt-2">
+                            ▶️ JALANKAN ALGORITMA
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD SCREEN -->
+        <div id="screen-leaderboard" class="screen min-h-screen bg-gray-100 p-4">
+            <div class="max-w-2xl mx-auto w-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800">🏆 Leaderboard Global</h1>
+                    <button onclick="showScreen('screen-login')" class="bg-white shadow-sm hover:bg-gray-50 px-5 py-2 rounded-xl font-bold text-gray-700 border">Kembali</button>
+                </div>
+                
+                <div id="sync-status" class="text-center text-sm font-bold text-blue-600 mb-4 animate-pulse">Sedang mengambil data terbaru...</div>
+                
+                <div class="bg-white rounded-3xl shadow-xl border p-6">
+                    <div id="leaderboard-list" class="space-y-3">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEACHER DASHBOARD SCREEN -->
+        <div id="screen-teacher" class="screen min-h-screen bg-gray-800 p-4 text-white">
+            <div class="max-w-5xl mx-auto w-full">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">👩‍🏫 Teacher Dashboard</h1>
+                        <p class="text-gray-400">Monitoring Progress Siswa secara Real-time</p>
+                    </div>
+                    <div class="flex gap-2 mt-4 md:mt-0">
+                        <button onclick="downloadCSV()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-bold shadow transition flex items-center gap-2">
+                            📊 Download CSV
+                        </button>
+                        <button onclick="showScreen('screen-login')" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg font-bold shadow transition">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Table -->
+                <div class="bg-gray-900 rounded-xl overflow-hidden shadow-2xl border border-gray-700 overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-700">
                             <tr>
                                 <th class="p-4">Rank</th>
                                 <th class="p-4">Nama Siswa</th>
                                 <th class="p-4">Kelas</th>
                                 <th class="p-4">Max Level</th>
-                                <th class="p-4">Skor</th>
-                                <th class="p-4">Bintang</th>
+                                <th class="p-4">Score</th>
+                                <th class="p-4 text-yellow-400">Stars</th>
                             </tr>
                         </thead>
-                        <tbody id="teacher-table-body" class="divide-y divide-gray-100">
+                        <tbody id="teacher-table-body" class="divide-y divide-gray-800">
                             <!-- Injected by JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- MODAL ALERT -->
-    <div id="modal-alert" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-100 transition-transform">
-            <div id="modal-icon" class="text-7xl mb-4">🎉</div>
-            <h2 id="modal-title" class="text-2xl font-black mb-2 text-gray-800 uppercase">GREAT JOB!</h2>
-            <p id="modal-desc" class="text-gray-600 mb-6 font-medium leading-relaxed">Algoritmamu berhasil membawa mobil ke sekolah.</p>
-            <div id="modal-stars" class="text-4xl mb-6 text-yellow-400 font-bold hidden drop-shadow-md">⭐⭐⭐</div>
-            <button id="modal-btn" onclick="closeModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg text-lg transform active:scale-95 transition">LANJUTKAN</button>
-        </div>
-    </div>
-
-    <!-- MODAL PIN TEACHER -->
-    <div id="modal-pin" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center">
-            <div class="text-5xl mb-4">🔒</div>
-            <h2 class="text-2xl font-bold mb-2 text-gray-800">TEACHER ACCESS</h2>
-            <p class="text-gray-500 mb-6 font-medium text-sm">Masukkan PIN untuk mengakses rekap data.</p>
-            
-            <input type="password" id="input-pin" placeholder="****" class="w-full px-4 py-4 rounded-xl border-2 border-gray-200 text-center text-3xl tracking-[0.5em] focus:border-purple-500 focus:outline-none font-bold mb-4" maxlength="4">
-            
-            <div class="flex gap-2">
-                <button onclick="closeModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl transition">BATAL</button>
-                <button onclick="verifyTeacherPin()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition">MASUK</button>
+        <!-- MODAL ALERT -->
+        <div id="modal-alert" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-100 transition-transform">
+                <div id="modal-icon" class="text-7xl mb-4">🎉</div>
+                <h2 id="modal-title" class="text-2xl font-black mb-2 text-gray-800 uppercase">GREAT JOB!</h2>
+                <p id="modal-desc" class="text-gray-600 mb-6 font-medium leading-relaxed">Algoritmamu berhasil membawa mobil ke sekolah.</p>
+                <div id="modal-stars" class="text-4xl mb-6 text-yellow-400 font-bold hidden drop-shadow-md">⭐⭐⭐</div>
+                <button id="modal-btn" onclick="closeModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg text-lg transform active:scale-95 transition">LANJUTKAN</button>
             </div>
         </div>
-    </div>
 
-    <script>
-        // Masukkan URL Web App Google Apps Script Anda di sini!
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyyRo1k_-CUpAvNc9ssQ6ig0MoCq6tdTVcXrRCWoaTpTBijxAF6qqnUyhrvxAo0lMx1VA/exec";
-
-        /* GAME DATA (25 LEVELS - Solvable Grid Fixed) */
-        // S = Start, F = Finish, . = Jalan, W = Tembok/Pohon, B = Barikade(🚧), C = Checkpoint(📍), E = Bensin(⛽)
-        const LEVELS = [
-            // WORLD 1: MORNING ROUTE
-            { id: 1, world: 1, title: "First Day", desc: "Maju lurus ke sekolah.", size: 4, grid: ["S...", "W.WW", "W.WW", "W..F"], opt: 6, energy: 99 },
-            { id: 2, world: 1, title: "Turn Right", desc: "Belok kanan di persimpangan.", size: 5, grid: ["SWWWW", ".WWWW", "...WW", "WW.WW", "WW..F"], opt: 8, energy: 99 },
-            { id: 3, world: 1, title: "Turn Left", desc: "Gunakan belok kiri dan kanan.", size: 5, grid: ["SWWWW", ".WWWW", "....W", "WWW.W", "WW..F"], opt: 8, energy: 99 },
-            { id: 4, world: 1, title: "Wrong Road", desc: "Awas masuk jalan buntu!", size: 5, grid: ["S.WWW", "W...W", "WWW.W", "W...W", "W.W.F"], opt: 8, energy: 99 },
-            { id: 5, world: 1, title: "School Gate", desc: "Rencanakan rute terpendek.", size: 6, grid: ["S.WWWW", "W....W", "WWWW.W", "W....W", "W.WWWW", "W....F"], opt: 11, energy: 99 },
+        <script>
+            /* -------------------------------------------------------------------------- */
+            /* SETUP CLOUD DATABASE (Google Sheets) & GLOBAL STATE          */
+            /* -------------------------------------------------------------------------- */
             
-            // WORLD 2: CITY TRAFFIC
-            { id: 6, world: 2, title: "Road Block", desc: "Hindari jalan ditutup (🚧).", size: 6, grid: ["S..WWW", "WW.WWW", "W..B.W", "W.WW.W", "W....F", "WWWWWW"], opt: 9, energy: 99 },
-            { id: 7, world: 2, title: "Traffic Jam", desc: "Cari jalan memutar.", size: 6, grid: ["S.WWWW", "W....W", "W.BW.W", "W..W.W", "WW...F", "WWWWWW"], opt: 9, energy: 99 },
-            { id: 8, world: 2, title: "Shortcut", desc: "Cari rute yang tidak diblokir.", size: 6, grid: ["S.WWWW", "W...BW", "W.W.WW", "W.W..W", "W.WW.W", "W....F"], opt: 11, energy: 99 },
-            { id: 9, world: 2, title: "Zig Zag", desc: "Melewati tikungan tajam.", size: 7, grid: ["S.WWWWW", "W.WWWWW", "W.....W", "WWWWW.W", "W.....W", "W.WWWWW", "W....WF"], opt: 12, energy: 99 },
-            { id: 10, world: 2, title: "Morning Traffic", desc: "Lewati kemacetan.", size: 7, grid: ["S.....W", "WWWWW.W", "W.....W", "W.WWWWW", "W.B...W", "WWWWW.W", "WWWWW.F"], opt: 16, energy: 99 },
+            // ⚠️ PASTE URL GOOGLE APPS SCRIPT ANDA DI SINI
+            const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyyRo1k_-CUpAvNc9ssQ6ig0MoCq6tdTVcXrRCWoaTpTBijxAF6qqnUyhrvxAo0lMx1VA/exec";
             
-            // WORLD 3: SMART ROUTE
-            { id: 11, world: 3, title: "Fuel Station", desc: "Ambil bensin (⛽) sebelum ke sekolah.", size: 6, grid: ["S.WWWW", "W.WWWW", "W...EW", "WWW..W", "WWWW.W", "WWWW.F"], opt: 8, energy: 99, needFuel: true },
-            { id: 12, world: 3, title: "Checkpoint", desc: "Lewati Checkpoint (📍).", size: 6, grid: ["S....W", "WWWW.W", "W..C.W", "W.WWWW", "W....F", "WWWWWW"], opt: 9, energy: 99, needCheckpoints: 1 },
-            { id: 13, world: 3, title: "Long Road", desc: "Gunakan instruksi secukupnya.", size: 7, grid: ["SWWWWWW", "......W", "W.WWW.W", "W.W...W", "W.W.W.W", "W...W.W", "WWWWW.F"], opt: 16, energy: 99 },
-            { id: 14, world: 3, title: "Pit Stop", desc: "Ambil bensin dan checkpoint.", size: 7, grid: ["S.WWWWW", "W..C..W", "WWWWW.W", "W..E..W", "W.WWWWW", "W.....F", "WWWWWWW"], opt: 14, energy: 99, needCheckpoints: 1, needFuel: true },
-            { id: 15, world: 3, title: "Efficient Driver", desc: "Gunakan fitur 'Repeat 2x'.", size: 7, grid: ["S.WWWWW", "W.WWWWW", "W.WWWWW", "W.....W", "WWWWW.W", "WWWWW.W", "WWWWW.F"], opt: 12, energy: 99, unlockRepeat: true },
+            const DB_KEY = 'roadToSchool_users_v3';
+            let users = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+            let globalCloudUsers = []; // Tempat simpan data real-time
+            let currentUser = null;
             
-            // WORLD 4: TRAFFIC LOGIC
-            { id: 16, world: 4, title: "Gate", desc: "Pilih jalur yang terbuka.", size: 7, grid: ["S..WWWW", "WW.WWWW", "W..B..W", "W.WWW.W", "W.....F", "WWWWWWW", "WWWWWWW"], opt: 10, energy: 99, unlockRepeat: true },
-            { id: 17, world: 4, title: "Traffic Sensor", desc: "Coba blok logika 'IF'.", size: 7, grid: ["WWWWWWW", "WWWW..F", "WWWWB.W", "S.....W", "WWWWWWW", "WWWWWWW", "WWWWWWW"], opt: 9, energy: 99, unlockIf: true, unlockRepeat: true },
-            { id: 18, world: 4, title: "Two Routes", desc: "Panjang tapi aman, atau pendek?", size: 8, grid: ["S......W", "WWWWWW.W", "W....W.W", "W.WW.W.W", "W.W..W.W", "W.W.WW.W", "W......W", "WWWWWW.F"], opt: 18, energy: 99, unlockIf: true, unlockRepeat: true },
-            { id: 19, world: 4, title: "Limited Energy", desc: "Energi pas-pasan! Cari rute terpendek.", size: 8, grid: ["S.WWWWWW", "W.WWWWWW", "W...WWWW", "WWW....W", "WWWWWW.W", "W......W", "W.WWWWWW", "W.WWWW.F"], opt: 15, energy: 15, unlockIf: true, unlockRepeat: true },
-            { id: 20, world: 4, title: "Logic Test", desc: "Gabungkan semua kemampuan.", size: 8, grid: ["S..C...W", "WWWWWW.W", "W.E....W", "W.WWWWWW", "W......W", "WWWWWW.W", "W......W", "WWWWWW.F"], opt: 19, energy: 20, needCheckpoints: 1, needFuel: true, unlockIf: true, unlockRepeat: true },
+            let currentLevel = null;
+            let algorithm = [];
+            let isExecuting = false;
+            let carPos = {x: 0, y: 0};
+            let currentAngle = 0; // 0=Right, 90=Down, 180=Left, -90/270=Up
+            let checkpointsCollected = 0;
+            let fuelCollected = false;
+            let currentEnergy = 99;
+            const MAX_ALGO_LENGTH = 60; 
 
-            // WORLD 5: SCHOOL MASTER
-            { id: 21, world: 5, title: "Big City", desc: "Kota besar, banyak rintangan.", size: 9, grid: ["S........", "WWWWWWWW.", "W...B...W", "W.WWWWW.W", "W.W.....W", "W.W.WWWWW", "W.W.....W", "W.WWWWW.W", "W.......F"], opt: 24, energy: 99, unlockIf: true, unlockRepeat: true },
-            { id: 22, world: 5, title: "Checkpoint Hunt", desc: "Kumpulkan 2 checkpoint.", size: 9, grid: ["S.WWWWWWW", "W.WWWWWWW", "W..C....W", "WWWWWWW.W", "W......C.", "W.WWWWWWW", "W.......W", "WWWWWWW.W", "WWWWWWW.F"], opt: 22, energy: 99, needCheckpoints: 2, unlockIf: true, unlockRepeat: true },
-            { id: 23, world: 5, title: "Rush Hour", desc: "Macet total, cari celah.", size: 9, grid: ["S.WWWWWWW", "W...B...W", "WWW.WWW.W", "W.E.W...W", "W.W.W.WWW", "W.W.W.B.W", "W.W...W.W", "W.WWWWW.W", "W.......F"], opt: 26, energy: 30, needFuel: true, unlockIf: true, unlockRepeat: true },
-            { id: 24, world: 5, title: "Ultimate Maze", desc: "Hati-hati tersesat.", size: 10, grid: ["S..WWWWWWW", "WW.WWWWWWW", "W........W", "W.WWWWWW.W", "W.C....W.W", "WWWWWW.W.W", "W......W.W", "W.WWWWWW.W", "W........W", "WWWWWWWW.F"], opt: 27, energy: 99, needCheckpoints: 1, unlockIf: true, unlockRepeat: true },
-            { id: 25, world: 5, title: "The Last Road", desc: "Misi Terakhir! Zig-Zag Maze.", size: 11, grid: [
-                "S.........W",
-                "WWWWWWWWW.W",
-                "W.C.......W",
-                "W.WWWWWWWWW",
-                "W.......E.W",
-                "WWWWWWWWW.W",
-                "W.........W",
-                "W.WWWWWWWWW",
-                "W.........W",
-                "WWWWWWWWW.W",
-                "W.........F"
-            ], opt: 40, energy: 50, needCheckpoints: 1, needFuel: true, unlockRepeat: true, unlockIf: true }
-        ];
+            // Icons / Legends
+            const ICON_SCHOOL = "🏫";
+            const ICON_HOME = "🏠";
+            const ICON_WALL = "🌲";
+            const ICON_BLOCK = "🚧";
+            const ICON_CHECKPOINT = "📍";
+            const ICON_FUEL = "⛽";
 
-        let users = [];
-        let currentUser = null;
-        
-        let currentLevel = null;
-        let algorithm = [];
-        let isExecuting = false;
-        let carPos = {x: 0, y: 0};
-        let currentAngle = 0; // 0 = Kanan, 90 = Bawah, 180 = Kiri, -90/270 = Atas
-        let checkpointsCollected = 0;
-        let fuelCollected = false;
-        let currentEnergy = 99;
-        
-        const MAX_ALGO_LENGTH = 45; // Ditingkatkan ke 45 untuk mengakomodir Maze besar
-
-        // SVG Vektor Mobil (Top Down)
-        const SVG_CAR = `
-        <svg viewBox="0 0 100 100" class="w-full h-full">
-            <rect x="15" y="25" width="70" height="50" rx="12" fill="#ef4444" />
-            <rect x="35" y="30" width="25" height="40" rx="6" fill="#1f2937" />
-            <rect x="80" y="32" width="8" height="10" rx="3" fill="#fef08a" />
-            <rect x="80" y="58" width="8" height="10" rx="3" fill="#fef08a" />
-            <rect x="10" y="32" width="6" height="10" rx="2" fill="#991b1b" />
-            <rect x="10" y="58" width="6" height="10" rx="2" fill="#991b1b" />
-        </svg>`;
-
-        const ICON_SCHOOL = "🏫";
-        const ICON_HOME = "🏠";
-        const ICON_WALL = "🌲";
-        const ICON_BLOCK = "🚧";
-        const ICON_CHECKPOINT = "📍";
-        const ICON_FUEL = "⛽";
-        let syncInterval = null;
-
-        async function fetchLeaderboardData() {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("ISI_DENGAN")) return;
-            try {
-                const response = await fetch(GOOGLE_SHEET_URL + "?action=getLeaderboard");
-                const data = await response.json();
-                users = data;
+            /* -------------------------------------------------------------------------- */
+            /* LEVEL CONFIGURATION (PERFECTED GRIDS & OPTIMAL SCORES)       */
+            /* -------------------------------------------------------------------------- */
+            const LEVELS = [
+                // WORLD 1: MORNING ROUTE (Dasar)
+                { id: 1, world: 1, title: "Level 1 - First Day", desc: "Jalan lurus menuju sekolah.", size: 4, grid: ["S...", "W.WW", "W.WW", "W..F"], opt: 6, energy: 99 },
+                { id: 2, world: 1, title: "Level 2 - Turn Right", desc: "Belok kanan di persimpangan.", size: 5, grid: ["SWWWW", ".WWWW", "...WW", "WW.WW", "WW..F"], opt: 8, energy: 99 },
+                { id: 3, world: 1, title: "Level 3 - Turn Left", desc: "Gunakan belok kiri dan kanan.", size: 5, grid: ["SWWWW", ".WWWW", "....W", "WWW.W", "WW..F"], opt: 8, energy: 99 },
+                { id: 4, world: 1, title: "Level 4 - Wrong Road", desc: "Hati-hati jalan buntu!", size: 5, grid: ["S.WWW", "W...W", "WWW.W", "W...W", "W.W.F"], opt: 8, energy: 99 },
+                { id: 5, world: 1, title: "Level 5 - School Gate", desc: "Rencanakan rute terpendek.", size: 6, grid: ["S.WWWW", "W....W", "WWWW.W", "W....W", "W.WWWW", "W....F"], opt: 16, energy: 99 },
                 
-                // Auto-refresh layar Leaderboard & Teacher
-                if (document.getElementById('screen-leaderboard').classList.contains('active')) {
-                    renderLeaderboard();
-                }
-                if (document.getElementById('screen-teacher') && document.getElementById('screen-teacher').classList.contains('active')) {
-                    renderTeacherData();
-                }
-            } catch (e) {
-                console.error("Gagal mengambil data dari Spreadsheet", e);
-            }
-        }
+                // WORLD 2: CITY TRAFFIC (Rintangan)
+                { id: 6, world: 2, title: "Level 6 - Road Block", desc: "Hindari jalan yang ditutup (🚧).", size: 6, grid: ["S..WWW", "WW.WWW", "W..B.W", "W.WW.W", "W....F", "WWWWWW"], opt: 9, energy: 99 },
+                { id: 7, world: 2, title: "Level 7 - Traffic Jam", desc: "Banyak mobil menghalangi jalan.", size: 6, grid: ["WWWWWW", "S....W", "W.BW.W", "W..W.W", "WW...F", "WWWWWW"], opt: 8, energy: 99 }, 
+                { id: 8, world: 2, title: "Level 8 - Shortcut", desc: "Cari rute memutar yang aman.", size: 6, grid: ["S.WWWW", "W...BW", "W.WW.W", "W....W", "WWWW.W", "W....F"], opt: 10, energy: 99 },
+                { id: 9, world: 2, title: "Level 9 - Zig Zag", desc: "Jalan berliku.", size: 7, grid: ["S.....W", "WWWWW.W", "W.....W", "W.WWWWW", "W.....W", "WWWWW.W", "WWWWW.F"], opt: 19, energy: 99 },
+                { id: 10, world: 2, title: "Level 10 - Morning Traffic", desc: "Lewati kemacetan.", size: 7, grid: ["S.....W", "WWWWW.W", "W.....W", "W.WWWWW", "W..B..W", "WWWWW.W", "WWWWW.F"], opt: 19, energy: 99 },
+                
+                // WORLD 3: SMART ROUTE (Efisiensi & Collectibles)
+                { id: 11, world: 3, title: "Level 11 - Fuel Station", desc: "Ambil bensin (⛽) sebelum ke sekolah.", size: 6, grid: ["S.WWWW", "W.WWWW", "W...EW", "WWW..W", "WWWW.W", "WWWW.F"], opt: 10, energy: 99, needFuel: true },
+                { id: 12, world: 3, title: "Level 12 - Checkpoint", desc: "Lewati Checkpoint (📍).", size: 6, grid: ["S...WW", "WWW.WW", "W..C.W", "W.WWWW", "W....F", "WWWWWW"], opt: 13, energy: 99, needCheckpoints: 1 },
+                { id: 13, world: 3, title: "Level 13 - Long Road", desc: "Gunakan instruksi secukupnya.", size: 7, grid: ["S.....W", "WWWWW.W", "W.....W", "W.WWWWW", "W.....W", "WWWWW.W", "WWWWW.F"], opt: 19, energy: 99 },
+                { id: 14, world: 3, title: "Level 14 - Pit Stop", desc: "Ambil bensin dan checkpoint.", size: 7, grid: ["S.....W", "WWWWW.W", "W.C...W", "W.WWWWW", "W..E..W", "WWWWW.W", "WWWWW.F"], opt: 19, energy: 99, needCheckpoints: 1, needFuel: true },
+                { id: 15, world: 3, title: "Level 15 - Efficient Driver", desc: "Algoritma paling optimal (Gunakan Repeat).", size: 7, grid: ["S.....W", "WWWWW.W", "W.....W", "W.WWWWW", "W.....W", "WWWWW.W", "WWWWW.F"], opt: 19, energy: 99, unlockRepeat: true },
+                
+                // WORLD 4: TRAFFIC LOGIC (Logika IF sederhana - diwakili dengan rute bercabang & Repeat)
+                { id: 16, world: 4, title: "Level 16 - Gate", desc: "Pilih jalur yang tidak ditutup.", size: 7, grid: ["S..WWWW", "WW.WWWW", "W..B..W", "W.WWW.W", "W.....F", "WWWWWWW", "WWWWWWW"], opt: 12, energy: 99 },
+                { id: 17, world: 4, title: "Level 17 - Traffic Sensor", desc: "Gunakan blok 'IF' (jika buntu belok kanan).", size: 8, grid: ["S.WWWWWW", "W.WWWWWW", "W...WWWW", "WWW....W", "WWWWWW.W", "W.....W", "W.WWWWWW", "W.....F"], opt: 21, energy: 99, unlockIf: true },
+                { id: 18, world: 4, title: "Level 18 - Two Routes", desc: "Jalur panjang yang aman, atau pendek yang berbahaya?", size: 8, grid: ["S.....WW", "WWWWW.WW", "W.....WW", "W.WWWWWW", "W.....WW", "WWWWW.WW", "WWWWW..F", "WWWWWWWW"], opt: 20, energy: 99 },
+                { id: 19, world: 4, title: "Level 19 - Limited Energy", desc: "Energi terbatas! Cari rute terpendek.", size: 8, grid: ["S.....WW", "WWWWW.WW", "WWWWW.WW", "WWWWW.WW", "WWWWW.WW", "WWWWW.WW", "WWWWW..F", "WWWWWWWW"], opt: 12, energy: 15 },
+                { id: 20, world: 4, title: "Level 20 - Logic Test", desc: "Gabungkan semua kemampuan.", size: 8, grid: ["S..C...W", "WWWWWW.W", "W.E....W", "W.WWWWWW", "W......W", "WWWWWW.W", "W......F", "WWWWWWWW"], opt: 22, energy: 25, needCheckpoints: 1, needFuel: true },
 
-        window.onload = () => {
-            fetchLeaderboardData(); 
-            // Jalankan auto-refresh setiap 5 detik (Simulasi Real-time Sinkronisasi Cloud)
-            syncInterval = setInterval(fetchLeaderboardData, 5000); 
-            
-            // Daftarkan event listener
-            document.getElementById('input-name').addEventListener('input', checkReturningUser);
-            document.getElementById('input-class').addEventListener('change', checkReturningUser);
-            
-            // Cek session login sebelumnya
-            const activeUserId = sessionStorage.getItem('activeUser');
-            if (activeUserId) {
-                // Utamakan load dari backup lokal agar data utuh, jika tidak ada cari dari users array
-                let backup = JSON.parse(localStorage.getItem('roadToSchool_backup'));
-                if (backup && backup.id === activeUserId) {
-                    currentUser = backup;
-                    showScreen('screen-map');
-                }
-            }
-        };
+                // WORLD 5: SCHOOL MASTER (Ujian Akhir)
+                { id: 21, world: 5, title: "Level 21 - Big City", desc: "Kota besar, banyak rintangan.", size: 9, grid: ["S.......W", "WWWWWWW.W", "W.......W", "W.WWWWWWW", "W.......W", "WWWWWWW.W", "W.......W", "W.WWWWWWW", "W.......F"], opt: 40, energy: 99 },
+                { id: 22, world: 5, title: "Level 22 - Checkpoint Hunt", desc: "Kumpulkan 2 checkpoint.", size: 9, grid: ["S.......W", "WWWWWWW.W", "W...C...W", "W.WWWWWWW", "W.....C.W", "WWWWWWW.W", "W.......W", "W.WWWWWWW", "W.......F"], opt: 40, energy: 99, needCheckpoints: 2 },
+                { id: 23, world: 5, title: "Level 23 - Rush Hour", desc: "Macet total, cari celah.", size: 9, grid: ["S.......W", "WWWWWWW.W", "W...E...W", "W.WWWWWWW", "W.B.....W", "WWWWWWW.W", "W.......W", "W.WWWWWWW", "W.......F"], opt: 40, energy: 45, needFuel: true },
+                { id: 24, world: 5, title: "Level 24 - Ultimate Maze", desc: "Hati-hati tersesat.", size: 10, grid: ["S........W", "WWWWWWWW.W", "W...C....W", "W.WWWWWWWW", "W........W", "WWWWWWWW.W", "W........W", "W.WWWWWWWW", "W........F", "WWWWWWWWWW"], opt: 45, energy: 99, needCheckpoints: 1 },
+                { id: 25, world: 5, title: "Level 25 - The Last Road", desc: "Misi terakhir menuju sekolah!", size: 11, grid: [
+                    "S.........W",
+                    "WWWWWWWWW.W",
+                    "W...C.....W",
+                    "W.WWWWWWWWW",
+                    "W.........W",
+                    "WWWWWWWWW.W",
+                    "W.....E...W",
+                    "W.WWWWWWWWW",
+                    "W.........W",
+                    "WWWWWWWWW.W",
+                    "W.........F"
+                ], opt: 50, energy: 60, needCheckpoints: 1, needFuel: true, unlockRepeat: true, unlockIf: true }
+            ];
 
-        function checkReturningUser() {
-            const name = document.getElementById('input-name').value.trim().toUpperCase();
-            const cls = document.getElementById('input-class').value;
-            const wb = document.getElementById('welcome-back');
-            
-            if (name.length > 2) {
-                const uniqueId = btoa(encodeURIComponent(name + "_" + cls)).replace(/=/g, '');
-                const existing = users.find(u => u.id === uniqueId);
-                if (existing) {
-                    wb.classList.remove('hidden');
-                    document.getElementById('wb-info').innerText = `Progress: Level ${existing.maxLevel} | Skor: ${existing.score}`;
+            /* -------------------------------------------------------------------------- */
+            /* INITIALIZATION & AUTHENTICATION                  */
+            /* -------------------------------------------------------------------------- */
+            window.onload = () => {
+                // Check session
+                const activeUserId = sessionStorage.getItem('activeUser');
+                if (activeUserId) {
+                    // Cari di local DB dulu
+                    currentUser = users.find(u => u.id === activeUserId);
+                    if (currentUser) {
+                        showScreen('screen-map');
+                        return;
+                    }
+                }
+                
+                // Listeners for Login Auto-Complete
+                document.getElementById('input-name').addEventListener('input', checkReturningUser);
+                document.getElementById('input-class').addEventListener('change', checkReturningUser);
+                
+                // Start Auto-Polling for Realtime Sync
+                setInterval(fetchLeaderboardData, 5000); 
+                fetchLeaderboardData(); // Fetch awal
+            };
+
+            function checkReturningUser() {
+                const name = document.getElementById('input-name').value.trim().toUpperCase();
+                const cls = document.getElementById('input-class').value;
+                const wb = document.getElementById('welcome-back');
+                
+                if (name.length > 2) {
+                    // Cek di cloud data dulu (supaya bisa lanjut di HP/Laptop lain)
+                    let existing = globalCloudUsers.find(u => u.name === name && u.class === cls);
+                    if(!existing) existing = users.find(u => u.name === name && u.class === cls); // Fallback ke lokal
+                    
+                    if (existing) {
+                        wb.classList.remove('hidden');
+                        document.getElementById('wb-info').innerText = `Progress: Level ${existing.maxLevel > 25 ? 25 : existing.maxLevel} | Skor: ${existing.score}`;
+                    } else {
+                        wb.classList.add('hidden');
+                    }
                 } else {
                     wb.classList.add('hidden');
                 }
-            } else {
-                wb.classList.add('hidden');
-            }
-        }
-
-        function startGame() {
-            const name = document.getElementById('input-name').value.trim().toUpperCase();
-            const cls = document.getElementById('input-class').value;
-            
-            if (name.length < 3) {
-                showAlert("⚠️ NAMA TIDAK VALID", "Masukkan nama minimal 3 huruf!");
-                return;
             }
 
-            const uniqueId = btoa(encodeURIComponent(name + "_" + cls)).replace(/=/g, '');
+            function startGame() {
+                const name = document.getElementById('input-name').value.trim().toUpperCase();
+                const cls = document.getElementById('input-class').value;
+                
+                if (name.length < 3) {
+                    alert("Masukkan nama minimal 3 huruf!");
+                    return;
+                }
 
-            let user = users.find(u => u.id === uniqueId);
-            if (!user) {
-                // Pemain Baru
-                user = {
-                    id: uniqueId,
-                    name: name,
-                    class: cls,
-                    maxLevel: 1,
-                    score: 0,
-                    stars: 0,
-                    levelData: {} 
-                };
-                users.push(user);
-            } else {
-                // Pemain Lama (Failsafe agar levelData selalu berupa Object)
+                // Cari User di Cloud atau Local
+                let user = globalCloudUsers.find(u => u.name === name && u.class === cls);
+                if (!user) user = users.find(u => u.name === name && u.class === cls);
+                
+                if (!user) {
+                    user = {
+                        id: 'RTS_' + Date.now().toString(),
+                        name: name,
+                        class: cls,
+                        maxLevel: 1,
+                        score: 0,
+                        stars: 0,
+                        levelData: {} 
+                    };
+                    users.push(user);
+                } else {
+                    // Update local storage dengan data cloud yang mungkin lebih update
+                    const localIndex = users.findIndex(u => u.id === user.id);
+                    if(localIndex > -1) users[localIndex] = user;
+                    else users.push(user);
+                }
+                
+                // Failsafe LevelData to prevent crashes
                 user.levelData = user.levelData || {};
+                
+                currentUser = user;
+                saveDB();
+                sessionStorage.setItem('activeUser', currentUser.id);
+                
+                showScreen('screen-map');
             }
-            
-            currentUser = user;
-            saveDB(); 
-            sessionStorage.setItem('activeUser', currentUser.id);
-            
-            showScreen('screen-map');
-        }
-        
-        function logout() {
-            sessionStorage.removeItem('activeUser');
-            currentUser = null;
-            showScreen('screen-login');
-            document.getElementById('input-name').value = ''; // Reset input field
-            checkReturningUser();
-        }
 
-        async function saveDB() {
-            if (!currentUser) return;
-            
-            // Failsafe format data
-            currentUser.levelData = currentUser.levelData || {};
-            localStorage.setItem('roadToSchool_backup', JSON.stringify(currentUser));
+            function logout() {
+                sessionStorage.removeItem('activeUser');
+                currentUser = null;
+                document.getElementById('input-name').value = '';
+                document.getElementById('welcome-back').classList.add('hidden');
+                showScreen('screen-login');
+            }
 
-            if (GOOGLE_SHEET_URL && !GOOGLE_SHEET_URL.includes("ISI_DENGAN")) {
-                try {
-                    await fetch(GOOGLE_SHEET_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'saveUser',
-                            data: currentUser
-                        })
+            /* -------------------------------------------------------------------------- */
+            /* CLOUD SYNC LOGIC (GOOGLE SHEETS)                 */
+            /* -------------------------------------------------------------------------- */
+            function saveDB() {
+                // Simpan ke Local
+                localStorage.setItem(DB_KEY, JSON.stringify(users));
+                // Sinkronisasi ke Cloud (Background)
+                if(currentUser) syncWithCloud(currentUser);
+            }
+
+            function syncWithCloud(userData) {
+                if(!GOOGLE_SHEET_URL) return;
+                
+                fetch(GOOGLE_SHEET_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Penting untuk bypass blokir CORS (write-only)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveUser', data: userData })
+                }).catch(err => console.log('Offline mode active', err));
+            }
+
+            function fetchLeaderboardData() {
+                if(!GOOGLE_SHEET_URL) return;
+                
+                fetch(GOOGLE_SHEET_URL + "?action=getLeaderboard")
+                    .then(res => res.json())
+                    .then(data => {
+                        globalCloudUsers = data;
+                        // Update UI jika layar aktif
+                        if(document.getElementById('screen-leaderboard').classList.contains('active')) renderLeaderboardUI();
+                        if(document.getElementById('screen-teacher').classList.contains('active')) renderTeacherDashboard();
+                    })
+                    .catch(err => {
+                        console.log('Error fetching leaderboard', err);
+                        globalCloudUsers = users; // Fallback lokal
                     });
-                    fetchLeaderboardData();
-                } catch (e) {
-                    console.error("Gagal menyimpan ke Spreadsheet:", e);
+            }
+
+            /* -------------------------------------------------------------------------- */
+            /* SCREEN ROUTING & MAP RENDER                      */
+            /* -------------------------------------------------------------------------- */
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+                
+                if(screenId === 'screen-map') renderMap();
+                if(screenId === 'screen-leaderboard') {
+                    document.getElementById('sync-status').innerText = "Sedang mengambil data terbaru...";
+                    fetchLeaderboardData(); 
+                    setTimeout(renderLeaderboardUI, 800); // Wait for fetch
                 }
             }
-        }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            
-            if(screenId === 'screen-map') renderMap();
-            if(screenId === 'screen-leaderboard') renderLeaderboard();
-            if(screenId === 'screen-teacher') renderTeacherData();
-        }
+            function renderMap() {
+                if(!currentUser) return;
 
-        function renderMap() {
-            if (!currentUser) return;
-            
-            // Failsafe jika levelData undefined akibat kegagalan sinkronisasi sheet
-            currentUser.levelData = currentUser.levelData || {};
-            
-            document.getElementById('map-player-name').innerText = currentUser.name;
-            document.getElementById('map-player-class').innerText = currentUser.class;
-            
-            let tScore = 0; let tStars = 0;
-            for(let key in currentUser.levelData) {
-                tScore += currentUser.levelData[key].score;
-                tStars += currentUser.levelData[key].stars;
-            }
-            currentUser.score = tScore;
-            currentUser.stars = tStars;
-            saveDB();
-
-            document.getElementById('map-total-stars').innerText = currentUser.stars;
-            document.getElementById('map-total-score').innerText = currentUser.score;
-
-            const progressPct = Math.min(100, Math.round(((currentUser.maxLevel - 1) / 25) * 100));
-            document.getElementById('progress-text').innerText = `${currentUser.maxLevel > 25 ? 25 : currentUser.maxLevel} / 25 LEVEL (${progressPct}%)`;
-            document.getElementById('progress-bar').style.width = `${progressPct}%`;
-
-            const grid = document.getElementById('level-grid');
-            grid.innerHTML = '';
-            
-            LEVELS.forEach(lvl => {
-                const isUnlocked = lvl.id <= currentUser.maxLevel;
-                const data = currentUser.levelData[lvl.id];
-                const stars = data ? '⭐'.repeat(data.stars) : '';
+                document.getElementById('map-player-name').innerText = currentUser.name;
+                document.getElementById('map-player-class').innerText = currentUser.class;
                 
-                const btn = document.createElement('button');
-                btn.className = `p-4 rounded-2xl shadow-sm border-2 flex flex-col items-center justify-center transition transform ${isUnlocked ? 'hover:scale-105 active:scale-95 cursor-pointer bg-white border-blue-200' : 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'}`;
+                // Hitung ulang total secara akurat (Anti-Cheat/Anti-Mismatch)
+                let tScore = 0; let tStars = 0;
+                currentUser.levelData = currentUser.levelData || {}; // Failsafe
                 
-                if (isUnlocked) {
-                    btn.onclick = () => initLevel(lvl.id);
-                    btn.innerHTML = `
-                        <div class="text-sm font-bold text-gray-500 mb-1">W${lvl.world}</div>
-                        <div class="text-2xl font-black text-blue-600 mb-1">${lvl.id}</div>
-                        <div class="text-xs text-yellow-500 h-4 drop-shadow-sm">${stars}</div>
-                    `;
-                    if(lvl.id === currentUser.maxLevel && lvl.id <= 25) {
-                        btn.classList.add('ring-4', 'ring-green-400', 'bg-green-50');
-                        btn.innerHTML += `<div class="absolute -top-3 -right-3 text-3xl animate-bounce">🚗</div>`;
-                    }
-                } else {
-                    btn.innerHTML = `
-                        <div class="text-2xl text-gray-400 mb-1">🔒</div>
-                        <div class="text-xs text-gray-400 font-bold">Lvl ${lvl.id}</div>
-                    `;
+                for(let key in currentUser.levelData) {
+                    tScore += currentUser.levelData[key].score || 0;
+                    tStars += currentUser.levelData[key].stars || 0;
                 }
-                grid.appendChild(btn);
-            });
-        }
+                currentUser.score = tScore;
+                currentUser.stars = tStars;
+                // Kita tidak perlu memanggil saveDB() berlebihan di sini untuk mencegah flood network
 
-        function initLevel(levelId) {
-            currentLevel = LEVELS.find(l => l.id === levelId);
-            algorithm = [];
-            isExecuting = false;
-            checkpointsCollected = 0;
-            fuelCollected = false;
-            currentEnergy = currentLevel.energy || 99;
-            currentAngle = 0;
-            
-            document.getElementById('game-level-title').innerText = `LEVEL ${currentLevel.id} - ${currentLevel.title}`;
-            document.getElementById('game-level-desc').innerText = currentLevel.desc;
-            document.getElementById('game-energy').innerText = currentEnergy > 50 ? '∞' : currentEnergy;
-            
-            document.getElementById('special-blocks').classList.toggle('hidden', !currentLevel.unlockRepeat && !currentLevel.unlockIf);
-            
-            renderAlgorithm();
-            buildGrid();
-            showScreen('screen-game');
-        }
+                document.getElementById('map-total-stars').innerText = currentUser.stars;
+                document.getElementById('map-total-score').innerText = currentUser.score;
 
-        function buildGrid() {
-            const board = document.getElementById('game-board');
-            board.innerHTML = '';
-            
-            const size = currentLevel.size;
-            board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-            board.style.width = size < 7 ? '320px' : (size < 9 ? '420px' : '100%');
-            board.style.maxWidth = '550px';
+                const progressPct = Math.min(100, Math.round(((currentUser.maxLevel - 1) / 25) * 100));
+                document.getElementById('progress-text').innerText = `${currentUser.maxLevel > 25 ? 25 : currentUser.maxLevel} / 25 LEVEL (${progressPct}%)`;
+                document.getElementById('progress-bar').style.width = `${progressPct}%`;
 
-            for (let y = 0; y < size; y++) {
-                for (let x = 0; x < size; x++) {
-                    const char = currentLevel.grid[y][x];
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell';
-                    cell.id = `cell-${x}-${y}`;
+                const grid = document.getElementById('level-grid');
+                grid.innerHTML = '';
+                
+                LEVELS.forEach(lvl => {
+                    const isUnlocked = lvl.id <= currentUser.maxLevel;
+                    const data = currentUser.levelData[lvl.id] || null;
+                    const stars = data ? '⭐'.repeat(data.stars) : '';
                     
-                    if (char === 'W') { 
-                        cell.classList.add('cell-wall'); 
-                        cell.innerText = ICON_WALL; 
-                    } else { 
-                        cell.classList.add('cell-road'); 
-                    }
+                    const btn = document.createElement('button');
+                    btn.className = `p-4 rounded-2xl shadow-sm border-2 flex flex-col items-center justify-center transition transform ${isUnlocked ? 'hover:scale-105 active:scale-95 cursor-pointer bg-white border-blue-200' : 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'}`;
                     
-                    if (char === 'S') {
-                        cell.classList.add('cell-start');
-                        cell.innerText = ICON_HOME;
-                        carPos = {x, y};
+                    if (isUnlocked) {
+                        btn.onclick = () => initLevel(lvl.id);
+                        btn.innerHTML = `
+                            <div class="text-sm font-bold text-gray-500 mb-1">W${lvl.world}</div>
+                            <div class="text-2xl font-black text-blue-600 mb-1">${lvl.id}</div>
+                            <div class="text-xs text-yellow-500 h-4 drop-shadow-sm">${stars}</div>
+                        `;
+                        // Animasi Mobil di level yang sedang aktif
+                        if(lvl.id === currentUser.maxLevel && lvl.id <= 25) {
+                            btn.classList.add('ring-4', 'ring-green-400', 'bg-green-50');
+                            btn.innerHTML += `<div class="absolute -top-3 -right-3 text-3xl animate-bounce">🚗</div>`;
+                        }
+                    } else {
+                        btn.innerHTML = `
+                            <div class="text-2xl text-gray-400 mb-1">🔒</div>
+                            <div class="text-xs text-gray-400 font-bold">Lvl ${lvl.id}</div>
+                        `;
                     }
-                    if (char === 'F') { cell.classList.add('cell-finish'); cell.innerText = ICON_SCHOOL; }
-                    if (char === 'B') { cell.innerText = ICON_BLOCK; }
-                    if (char === 'C') { cell.innerText = ICON_CHECKPOINT; }
-                    if (char === 'E') { cell.innerText = ICON_FUEL; }
-
-                    board.appendChild(cell);
-                }
+                    grid.appendChild(btn);
+                });
             }
-            
-            const car = document.createElement('div');
-            car.id = 'car';
-            car.innerHTML = `<div id="car-inner">${SVG_CAR}</div>`;
-            board.appendChild(car);
-            
-            setTimeout(() => { updateCarPosition(true); }, 50);
-        }
 
-        function updateCarPosition(instant = false) {
-            const carInner = document.getElementById('car-inner');
-            const carContainer = document.getElementById('car');
-            const cell = document.getElementById(`cell-${carPos.x}-${carPos.y}`);
-            
-            if (cell && carInner && carContainer) {
-                // Kalkulasi letak absolut di dalam container board
-                const top = cell.offsetTop;
-                const left = cell.offsetLeft;
-                const sizeW = cell.offsetWidth;
-                const sizeH = cell.offsetHeight;
+            /* -------------------------------------------------------------------------- */
+            /* GAME ENGINE - MAZE LOGIC                     */
+            /* -------------------------------------------------------------------------- */
+            function initLevel(levelId) {
+                currentLevel = LEVELS.find(l => l.id === levelId);
+                algorithm = [];
+                isExecuting = false;
+                checkpointsCollected = 0;
+                fuelCollected = false;
+                currentEnergy = currentLevel.energy || 99;
+                currentAngle = 0; // Menghadap kanan secara default (0 derajat)
                 
-                carContainer.style.width = `${sizeW}px`;
-                carContainer.style.height = `${sizeH}px`;
-                carContainer.style.top = `${top}px`;
-                carContainer.style.left = `${left}px`;
-                
-                if (instant) {
-                    carInner.style.transition = 'none';
-                    carContainer.style.transition = 'none';
-                } else {
-                    carInner.style.transition = 'top 0.3s ease-in-out, left 0.3s ease-in-out';
-                    carContainer.style.transition = 'transform 0.2s ease';
-                }
-                
-                // Rotasi Mobil secara Smooth
-                carContainer.style.transform = `rotate(${currentAngle}deg)`;
-                
-                if(instant) carContainer.offsetHeight; // force reflow
-            }
-        }
-
-        window.addEventListener('resize', () => {
-            if(document.getElementById('screen-game').classList.contains('active')) {
-                updateCarPosition(true);
-            }
-        });
-
-        function addBlock(cmd) {
-            if (isExecuting) return;
-            if (algorithm.length >= MAX_ALGO_LENGTH) {
-                showAlert("⚠️ MEMORI PENUH", `Maksimal ${MAX_ALGO_LENGTH} instruksi memori.`);
-                return;
-            }
-            algorithm.push(cmd);
-            renderAlgorithm();
-        }
-
-        function removeBlock(index) {
-            if (isExecuting) return;
-            algorithm.splice(index, 1);
-            renderAlgorithm();
-        }
-
-        function renderAlgorithm() {
-            const queue = document.getElementById('algorithm-queue');
-            queue.innerHTML = '';
-            
-            const labels = {
-                'UP': '⬆️', 'DOWN': '⬇️', 'LEFT': '⬅️', 'RIGHT': '➡️',
-                'LOOP2': '🔁 2x', 'IF_BLOCK': '❓ Jika ⬆️ 🚧, ➡️'
-            };
-
-            algorithm.forEach((cmd, idx) => {
-                const el = document.createElement('div');
-                el.className = 'bg-white border-2 border-blue-400 text-blue-800 font-bold px-3 py-2 rounded-lg cursor-pointer hover:bg-red-100 transition shadow-sm text-sm md:text-base flex items-center justify-center';
-                el.innerText = labels[cmd];
-                el.id = `block-${idx}`;
-                el.onclick = () => removeBlock(idx);
-                queue.appendChild(el);
-            });
-            
-            document.getElementById('algo-counter').innerText = `${algorithm.length}/${MAX_ALGO_LENGTH}`;
-            queue.scrollTop = queue.scrollHeight;
-        }
-
-        function resetLevel() {
-            if (isExecuting) return;
-            algorithm = [];
-            checkpointsCollected = 0;
-            fuelCollected = false;
-            currentEnergy = currentLevel.energy || 99;
-            currentAngle = 0;
-            document.getElementById('game-energy').innerText = currentEnergy > 50 ? '∞' : currentEnergy;
-            
-            for (let y = 0; y < currentLevel.size; y++) {
-                for (let x = 0; x < currentLevel.size; x++) {
-                    if (currentLevel.grid[y][x] === 'S') carPos = {x, y};
-                    const cell = document.getElementById(`cell-${x}-${y}`);
-                    if(currentLevel.grid[y][x] === 'C') cell.innerText = ICON_CHECKPOINT;
-                    if(currentLevel.grid[y][x] === 'E') cell.innerText = ICON_FUEL;
-                }
-            }
-            renderAlgorithm();
-            updateCarPosition(true);
-        }
-
-        function useHint() {
-            if(isExecuting) return;
-            showAlert("💡 HINT", `Target langkah optimal: ${currentLevel.opt} langkah.\n\n${currentLevel.desc}\n\nIngat: ⬆️ selalu mengarah ke ATAS layar, ➡️ selalu ke KANAN layar.`);
-        }
-
-        const delay = ms => new Promise(res => setTimeout(res, ms));
-
-        async function runAlgorithm() {
-            if (isExecuting) return;
-            if (algorithm.length === 0) {
-                showAlert("⚠️ KOSONG", "Susun algoritma terlebih dahulu!");
-                return;
-            }
-
-            isExecuting = true;
-            document.getElementById('btn-run').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('btn-run').innerText = "⏳ MENJALANKAN...";
-
-            for (let y = 0; y < currentLevel.size; y++) {
-                for (let x = 0; x < currentLevel.size; x++) {
-                    if (currentLevel.grid[y][x] === 'S') carPos = {x, y};
-                }
-            }
-            currentAngle = 0;
-            updateCarPosition(true);
-            await delay(400);
-
-            let success = true;
-            let errorMsg = "";
-
-            let executableQueue = [];
-            for(let i=0; i<algorithm.length; i++) {
-                if(algorithm[i] === 'LOOP2') {
-                    if(i > 0 && ['UP','DOWN','LEFT','RIGHT'].includes(algorithm[i-1])) {
-                        executableQueue.push({cmd: algorithm[i-1], originalIdx: i});
-                        executableQueue.push({cmd: algorithm[i-1], originalIdx: i});
-                    }
-                } else {
-                    executableQueue.push({cmd: algorithm[i], originalIdx: i});
-                }
-            }
-
-            for (let step of executableQueue) {
-                const blockEl = document.getElementById(`block-${step.originalIdx}`);
-                if (blockEl) {
-                    document.querySelectorAll('#algorithm-queue > div').forEach(el => el.classList.remove('executing-block'));
-                    blockEl.classList.add('executing-block');
-                }
-
-                let dir = step.cmd;
-
-                if (dir === 'IF_BLOCK') {
-                    let checkY = carPos.y - 1;
-                    let isBlocked = false;
-                    if(checkY < 0 || currentLevel.grid[checkY][carPos.x] === 'W' || currentLevel.grid[checkY][carPos.x] === 'B') {
-                        isBlocked = true;
-                    }
-                    dir = isBlocked ? 'RIGHT' : 'UP'; 
-                }
-
-                // Kalkulasi Jarak Putar Terpendek (Shortest Path Rotation)
-                let targetAngle = currentAngle;
-                if (dir === 'RIGHT') targetAngle = 0;
-                if (dir === 'DOWN') targetAngle = 90;
-                if (dir === 'LEFT') targetAngle = 180;
-                if (dir === 'UP') targetAngle = -90;
-
-                let diff = (targetAngle - currentAngle) % 360;
-                if (diff > 180) diff -= 360;
-                if (diff < -180) diff += 360;
-                currentAngle += diff;
-                
-                const carContainer = document.getElementById('car');
-                carContainer.style.transform = `rotate(${currentAngle}deg)`;
-                
-                // Beri waktu mobil berputar sebelum maju
-                if (diff !== 0) {
-                    await delay(200);
-                }
-
-                let nx = carPos.x;
-                let ny = carPos.y;
-                if (dir === 'UP') ny--;
-                if (dir === 'DOWN') ny++;
-                if (dir === 'LEFT') nx--;
-                if (dir === 'RIGHT') nx++;
-
-                currentEnergy--;
+                document.getElementById('game-level-title').innerText = `LEVEL ${currentLevel.id} - ${currentLevel.title}`;
+                document.getElementById('game-level-desc').innerText = currentLevel.desc;
                 document.getElementById('game-energy').innerText = currentEnergy > 50 ? '∞' : currentEnergy;
                 
-                if (currentEnergy < 0) {
-                    success = false;
-                    errorMsg = "Bensin habis! Cari rute yang lebih efisien atau ambil bensin.";
-                    break;
-                }
+                document.getElementById('special-blocks').classList.toggle('hidden', !currentLevel.unlockRepeat && !currentLevel.unlockIf);
+                
+                renderAlgorithm();
+                buildGrid();
+                showScreen('screen-game');
+            }
 
-                if (nx < 0 || ny < 0 || nx >= currentLevel.size || ny >= currentLevel.size) {
-                    success = false;
-                    errorMsg = "Mobil keluar dari batas area map!";
-                    break;
-                }
+            function buildGrid() {
+                const board = document.getElementById('game-board');
+                // Hapus isi kecuali elemen #car
+                const carEl = document.getElementById('car');
+                board.innerHTML = '';
+                
+                const size = currentLevel.size;
+                board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+                board.style.width = size < 7 ? '320px' : (size < 9 ? '420px' : '100%');
+                board.style.maxWidth = '550px';
 
-                const targetCell = currentLevel.grid[ny][nx];
-                if (targetCell === 'W') {
-                    success = false;
-                    errorMsg = "Menabrak dinding/pohon! Periksa algoritmamu.";
-                    break;
-                }
-                if (targetCell === 'B') {
-                    success = false;
-                    errorMsg = "Jalan ini sedang ditutup (🚧). Cari jalur lain.";
-                    break;
-                }
+                for (let y = 0; y < size; y++) {
+                    for (let x = 0; x < size; x++) {
+                        const char = currentLevel.grid[y][x];
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell';
+                        cell.id = `cell-${x}-${y}`;
+                        
+                        if (char === 'W') { 
+                            cell.classList.add('cell-wall'); 
+                            cell.innerText = ICON_WALL; 
+                        } else { 
+                            cell.classList.add('cell-road'); 
+                        }
+                        
+                        if (char === 'S') {
+                            cell.classList.add('cell-start');
+                            cell.innerText = ICON_HOME;
+                            carPos = {x, y};
+                        }
+                        if (char === 'F') { cell.classList.add('cell-finish'); cell.innerText = ICON_SCHOOL; }
+                        if (char === 'B') { cell.innerText = ICON_BLOCK; }
+                        if (char === 'C') { cell.innerText = ICON_CHECKPOINT; }
+                        if (char === 'E') { cell.innerText = ICON_FUEL; }
 
-                carPos = {x: nx, y: ny};
-                updateCarPosition();
-                await delay(350);
-
-                const cellDom = document.getElementById(`cell-${nx}-${ny}`);
-                if (targetCell === 'C' && cellDom.innerText === ICON_CHECKPOINT) {
-                    checkpointsCollected++;
-                    cellDom.innerText = ''; 
+                        board.appendChild(cell);
+                    }
                 }
-                if (targetCell === 'E' && cellDom.innerText === ICON_FUEL) {
-                    fuelCollected = true;
-                    currentEnergy += 20;
-                    document.getElementById('game-energy').innerText = currentEnergy;
-                    cellDom.innerText = '';
+                
+                // Masukkan kembali mobil
+                board.appendChild(carEl);
+                
+                // Update posisi mobil dengan instant
+                setTimeout(() => { updateCarPosition(true); }, 50);
+            }
+
+            function updateCarPosition(instant = false) {
+                const carInner = document.getElementById('car-inner');
+                const carContainer = document.getElementById('car');
+                const cell = document.getElementById(`cell-${carPos.x}-${carPos.y}`);
+                
+                if (cell && carInner && carContainer) {
+                    // Perhitungan akurat relative terhadap parent (.game-grid)
+                    const top = cell.offsetTop;
+                    const left = cell.offsetLeft;
+                    const sizeW = cell.offsetWidth;
+                    const sizeH = cell.offsetHeight;
+                    
+                    carContainer.style.width = `${sizeW}px`;
+                    carContainer.style.height = `${sizeH}px`;
+                    carContainer.style.top = `${top}px`;
+                    carContainer.style.left = `${left}px`;
+                    
+                    if (instant) {
+                        carInner.style.transition = 'none';
+                        carContainer.style.transition = 'none';
+                    } else {
+                        carInner.style.transition = 'top 0.3s ease-in-out, left 0.3s ease-in-out';
+                        carContainer.style.transition = 'transform 0.2s ease';
+                    }
+                    
+                    // Terapkan sudut yang sudah dihitung agar memutar jalan terpendek
+                    carContainer.style.transform = `rotate(${currentAngle}deg)`;
+                    
+                    if(instant) carContainer.offsetHeight; // Force reflow
                 }
             }
 
-            document.querySelectorAll('#algorithm-queue > div').forEach(el => el.classList.remove('executing-block'));
+            window.addEventListener('resize', () => {
+                if(document.getElementById('screen-game').classList.contains('active')) {
+                    updateCarPosition(true);
+                }
+            });
 
-            if (success) {
-                if (currentLevel.grid[carPos.y][carPos.x] === 'F') {
-                    let reqMet = true;
-                    if(currentLevel.needCheckpoints && checkpointsCollected < currentLevel.needCheckpoints) {
-                        reqMet = false;
-                        errorMsg = "Kamu belum melewati semua Checkpoint (📍)!";
-                    }
-                    if(currentLevel.needFuel && !fuelCollected) {
-                        reqMet = false;
-                        errorMsg = "Kamu harus mengisi bahan bakar (⛽) dulu!";
-                    }
+            /* -------------------------------------------------------------------------- */
+            /* ALGORITHM BUILDER                            */
+            /* -------------------------------------------------------------------------- */
+            function addBlock(cmd) {
+                if (isExecuting) return;
+                if (algorithm.length >= MAX_ALGO_LENGTH) {
+                    showAlert("⚠️ MEMORI PENUH", `Maksimal ${MAX_ALGO_LENGTH} instruksi.`);
+                    return;
+                }
+                algorithm.push(cmd);
+                renderAlgorithm();
+            }
 
-                    if(reqMet) {
-                        levelComplete();
+            function removeBlock(index) {
+                if (isExecuting) return;
+                algorithm.splice(index, 1);
+                renderAlgorithm();
+            }
+
+            function renderAlgorithm() {
+                const queue = document.getElementById('algorithm-queue');
+                queue.innerHTML = '';
+                
+                const labels = {
+                    'UP': '⬆️', 'DOWN': '⬇️', 'LEFT': '⬅️', 'RIGHT': '➡️',
+                    'LOOP2': '🔁x2', 'IF_BLOCK': '❓ Jika 🚧 belok ➡️'
+                };
+
+                algorithm.forEach((cmd, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-white border-2 border-blue-400 text-blue-800 font-bold px-3 py-2 rounded-lg cursor-pointer hover:bg-red-100 transition shadow-sm text-sm md:text-base flex items-center justify-center';
+                    el.innerText = labels[cmd];
+                    el.id = `block-${idx}`;
+                    el.onclick = () => removeBlock(idx);
+                    queue.appendChild(el);
+                });
+                
+                document.getElementById('algo-counter').innerText = `${algorithm.length}/${MAX_ALGO_LENGTH}`;
+                queue.scrollTop = queue.scrollHeight;
+            }
+
+            function resetLevel() {
+                if (isExecuting) return;
+                algorithm = [];
+                checkpointsCollected = 0;
+                fuelCollected = false;
+                currentEnergy = currentLevel.energy || 99;
+                currentAngle = 0;
+                document.getElementById('game-energy').innerText = currentEnergy > 50 ? '∞' : currentEnergy;
+                
+                for (let y = 0; y < currentLevel.size; y++) {
+                    for (let x = 0; x < currentLevel.size; x++) {
+                        if (currentLevel.grid[y][x] === 'S') carPos = {x, y};
+                        const cell = document.getElementById(`cell-${x}-${y}`);
+                        if(currentLevel.grid[y][x] === 'C') cell.innerText = ICON_CHECKPOINT;
+                        if(currentLevel.grid[y][x] === 'E') cell.innerText = ICON_FUEL;
+                    }
+                }
+                renderAlgorithm();
+                updateCarPosition(true);
+            }
+
+            function useHint() {
+                if(isExecuting) return;
+                showAlert("💡 HINT", `Target optimal untuk ⭐⭐⭐ adalah: ${currentLevel.opt} langkah.\n\n${currentLevel.desc}\n\nIngat: ⬆️ selalu bergerak ke ATAS layar, dan ➡️ ke KANAN layar. Rencanakan rutenya matang-matang.`);
+            }
+
+            const delay = ms => new Promise(res => setTimeout(res, ms));
+
+            /* -------------------------------------------------------------------------- */
+            /* ALGORITHM EXECUTION                          */
+            /* -------------------------------------------------------------------------- */
+            async function runAlgorithm() {
+                if (isExecuting) return;
+                if (algorithm.length === 0) {
+                    showAlert("⚠️ KOSONG", "Susun algoritma terlebih dahulu!");
+                    return;
+                }
+
+                isExecuting = true;
+                document.getElementById('btn-run').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btn-run').innerText = "⏳ MENJALANKAN...";
+
+                // Reset start
+                for (let y = 0; y < currentLevel.size; y++) {
+                    for (let x = 0; x < currentLevel.size; x++) {
+                        if (currentLevel.grid[y][x] === 'S') carPos = {x, y};
+                    }
+                }
+                currentAngle = 0;
+                updateCarPosition(true);
+                await delay(400);
+
+                let success = true;
+                let errorMsg = "";
+
+                // Parsing Macro (LOOP / IF)
+                let executableQueue = [];
+                for(let i=0; i<algorithm.length; i++) {
+                    if(algorithm[i] === 'LOOP2') {
+                        if(i > 0 && ['UP','DOWN','LEFT','RIGHT'].includes(algorithm[i-1])) {
+                            executableQueue.push({cmd: algorithm[i-1], originalIdx: i});
+                            executableQueue.push({cmd: algorithm[i-1], originalIdx: i});
+                        }
                     } else {
-                        showAlert("⚠️ MISI GAGAL", errorMsg);
+                        executableQueue.push({cmd: algorithm[i], originalIdx: i});
+                    }
+                }
+
+                // Execution Loop
+                for (let step of executableQueue) {
+                    const blockEl = document.getElementById(`block-${step.originalIdx}`);
+                    if (blockEl) {
+                        document.querySelectorAll('#algorithm-queue > div').forEach(el => el.classList.remove('executing-block'));
+                        blockEl.classList.add('executing-block');
+                    }
+
+                    let dir = step.cmd;
+
+                    if (dir === 'IF_BLOCK') {
+                        let checkY = carPos.y - 1; // Cek petak atas
+                        let isBlocked = false;
+                        if(checkY < 0 || currentLevel.grid[checkY][carPos.x] === 'W' || currentLevel.grid[checkY][carPos.x] === 'B') {
+                            isBlocked = true;
+                        }
+                        dir = isBlocked ? 'RIGHT' : 'UP'; 
+                    }
+
+                    // Kalkulasi Rotasi Halus (Jalan terpendek putaran)
+                    let targetAngle = currentAngle;
+                    if (dir === 'RIGHT') targetAngle = 0;
+                    if (dir === 'DOWN') targetAngle = 90;
+                    if (dir === 'LEFT') targetAngle = 180;
+                    if (dir === 'UP') targetAngle = -90;
+
+                    let diff = (targetAngle - currentAngle) % 360;
+                    if (diff > 180) diff -= 360;
+                    if (diff < -180) diff += 360;
+                    currentAngle += diff;
+                    
+                    const carContainer = document.getElementById('car');
+                    carContainer.style.transform = `rotate(${currentAngle}deg)`;
+                    
+                    // Jeda khusus jika berbelok (agar tidak terlalu cepat)
+                    if (diff !== 0) await delay(200);
+
+                    let nx = carPos.x;
+                    let ny = carPos.y;
+                    if (dir === 'UP') ny--;
+                    if (dir === 'DOWN') ny++;
+                    if (dir === 'LEFT') nx--;
+                    if (dir === 'RIGHT') nx++;
+
+                    // Pengurangan Bensin
+                    currentEnergy--;
+                    document.getElementById('game-energy').innerText = currentEnergy > 50 ? '∞' : currentEnergy;
+                    
+                    if (currentEnergy < 0) {
+                        success = false;
+                        errorMsg = "Bensin habis! Cari rute yang lebih efisien atau ambil bensin.";
+                        break;
+                    }
+
+                    // Validasi Tabrakan / Keluar Map
+                    if (nx < 0 || ny < 0 || nx >= currentLevel.size || ny >= currentLevel.size) {
+                        success = false;
+                        errorMsg = "Mobil keluar dari batas area map!";
+                        break;
+                    }
+
+                    const targetCell = currentLevel.grid[ny][nx];
+                    if (targetCell === 'W') {
+                        success = false;
+                        errorMsg = "Menabrak dinding/pohon! Periksa algoritmamu.";
+                        break;
+                    }
+                    if (targetCell === 'B') {
+                        success = false;
+                        errorMsg = "Jalan ini sedang ditutup (🚧). Cari jalur lain.";
+                        break;
+                    }
+
+                    // Move visual car
+                    carPos = {x: nx, y: ny};
+                    updateCarPosition();
+                    await delay(350);
+
+                    // Collectibles Check
+                    const cellDom = document.getElementById(`cell-${nx}-${ny}`);
+                    if (targetCell === 'C' && cellDom.innerText === ICON_CHECKPOINT) {
+                        checkpointsCollected++;
+                        cellDom.innerText = ''; 
+                    }
+                    if (targetCell === 'E' && cellDom.innerText === ICON_FUEL) {
+                        fuelCollected = true;
+                        currentEnergy += 20;
+                        document.getElementById('game-energy').innerText = currentEnergy;
+                        cellDom.innerText = '';
+                    }
+                }
+
+                document.querySelectorAll('#algorithm-queue > div').forEach(el => el.classList.remove('executing-block'));
+
+                // Final Result Check
+                if (success) {
+                    if (currentLevel.grid[carPos.y][carPos.x] === 'F') {
+                        let reqMet = true;
+                        if(currentLevel.needCheckpoints && checkpointsCollected < currentLevel.needCheckpoints) {
+                            reqMet = false;
+                            errorMsg = "Kamu belum melewati semua Checkpoint (📍)!";
+                        }
+                        if(currentLevel.needFuel && !fuelCollected) {
+                            reqMet = false;
+                            errorMsg = "Kamu harus mengisi bahan bakar (⛽) dulu!";
+                        }
+
+                        if(reqMet) {
+                            levelComplete();
+                        } else {
+                            showAlert("⚠️ MISI GAGAL", errorMsg);
+                        }
+                    } else {
+                        showAlert("⚠️ BELUM SAMPAI", "Algoritma selesai, tapi mobil berhenti sebelum mencapai sekolah.");
                     }
                 } else {
-                    showAlert("⚠️ BELUM SAMPAI", "Algoritma selesai, tapi mobil berhenti sebelum mencapai sekolah.");
+                    showAlert("💥 KECELAKAAN!", errorMsg);
                 }
-            } else {
-                showAlert("💥 KECELAKAAN!", errorMsg);
+
+                isExecuting = false;
+                document.getElementById('btn-run').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btn-run').innerHTML = "▶️ JALANKAN ALGORITMA";
             }
 
-            isExecuting = false;
-            document.getElementById('btn-run').classList.remove('opacity-50', 'cursor-not-allowed');
-            document.getElementById('btn-run').innerHTML = "▶️ JALANKAN ALGORITMA";
-        }
-
-        function levelComplete() {
-            let steps = algorithm.length;
-            let opt = currentLevel.opt;
-            
-            let stars = 1;
-            let score = 100;
-            
-            if (steps <= opt + 3) { stars = 2; score += 50; }
-            if (steps <= opt) { stars = 3; score += 100; } 
-            
-            if(!currentUser.levelData[currentLevel.id] || currentUser.levelData[currentLevel.id].score < score) {
-                currentUser.levelData[currentLevel.id] = { stars, score, steps };
-            }
-            
-            if (currentLevel.id === currentUser.maxLevel && currentUser.maxLevel < 25) {
-                currentUser.maxLevel++;
-            }
-            saveDB();
-
-            document.getElementById('modal-icon').innerText = "🎉";
-            document.getElementById('modal-title').innerText = "SCHOOL ARRIVED!";
-            document.getElementById('modal-desc').innerText = `Hebat! Algoritma berhasil!\nLangkah kamu: ${steps} (Optimal: ${opt})`;
-            document.getElementById('modal-stars').innerText = "⭐".repeat(stars);
-            document.getElementById('modal-stars').classList.remove('hidden');
-            
-            const btn = document.getElementById('modal-btn');
-            if (currentLevel.id === 25) {
-                btn.innerText = "🏆 TAMAT! LIHAT LEADERBOARD";
-                btn.onclick = () => { closeModal(); showLeaderboard(); };
-            } else {
-                btn.innerText = "NEXT LEVEL ➡️";
-                btn.onclick = () => { closeModal(); showScreen('screen-map'); };
-            }
-
-            document.getElementById('modal-alert').classList.remove('hidden');
-        }
-
-        function showAlert(title, desc) {
-            document.getElementById('modal-icon').innerText = title.includes('💥') ? "💥" : (title.includes('💡') ? "💡" : "⚠️");
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-desc').innerText = desc;
-            document.getElementById('modal-stars').classList.add('hidden');
-            
-            const btn = document.getElementById('modal-btn');
-            btn.innerText = "COBA LAGI";
-            btn.onclick = () => { closeModal(); resetLevel(); };
-            
-            document.getElementById('modal-alert').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal-alert').classList.add('hidden');
-            document.getElementById('modal-pin').classList.add('hidden');
-        }
-
-        function showLeaderboard() {
-            showScreen('screen-leaderboard');
-        }
-
-        function renderLeaderboard() {
-            const list = document.getElementById('leaderboard-list');
-            list.innerHTML = '';
-            
-            let sorted = [...users].sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                return b.stars - a.stars;
-            });
-
-            if (sorted.length === 0) {
-                list.innerHTML = `<div class="text-center text-gray-500 py-8 font-bold">Belum ada data pemain.</div>`;
-                return;
-            }
-
-            // Hanya tampilkan Top 10 di UI Siswa
-            sorted.slice(0, 10).forEach((u, index) => {
-                let badge = `${index + 1}`;
-                if(index === 0) badge = "🥇";
-                if(index === 1) badge = "🥈";
-                if(index === 2) badge = "🥉";
-
-                let isMe = currentUser && u.id === currentUser.id;
-
-                const row = document.createElement('div');
-                row.className = `flex items-center justify-between p-4 rounded-xl border-2 transition ${isMe ? 'bg-blue-50 border-blue-400 shadow-md transform scale-[1.02]' : 'bg-gray-50 border-gray-100'}`;
+            /* -------------------------------------------------------------------------- */
+            /* SCORING & WIN STATE                          */
+            /* -------------------------------------------------------------------------- */
+            function levelComplete() {
+                let steps = algorithm.length;
+                let opt = currentLevel.opt;
                 
-                row.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="text-3xl font-black w-10 text-center text-gray-700">${badge}</div>
-                        <div>
-                            <div class="font-bold text-gray-800 text-lg uppercase tracking-wide">${u.name} ${isMe ? '<span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full ml-2 shadow-sm">KAMU</span>' : ''}</div>
-                            <div class="text-sm font-semibold text-gray-500">Kelas ${u.class} | Max Level ${u.maxLevel > 25 ? 25 : u.maxLevel}</div>
+                let stars = 1;
+                let score = 100;
+                
+                // Grading logic presisi
+                if (steps <= opt + 3) { stars = 2; score += 50; }
+                if (steps <= opt) { stars = 3; score += 100; } 
+                
+                currentUser.levelData = currentUser.levelData || {};
+                if(!currentUser.levelData[currentLevel.id] || currentUser.levelData[currentLevel.id].score < score) {
+                    currentUser.levelData[currentLevel.id] = { stars, score, steps };
+                }
+                
+                if (currentLevel.id === currentUser.maxLevel && currentUser.maxLevel < 25) {
+                    currentUser.maxLevel++;
+                }
+                
+                saveDB(); // Menyimpan sekaligus mendorong data ke Cloud (Google Sheets)
+
+                // UI Modal Win
+                document.getElementById('modal-icon').innerText = "🎉";
+                document.getElementById('modal-title').innerText = "SCHOOL ARRIVED!";
+                document.getElementById('modal-desc').innerText = `Hebat! Algoritma berhasil!\nLangkah kamu: ${steps} (Optimal: ${opt})`;
+                document.getElementById('modal-stars').innerText = "⭐".repeat(stars);
+                document.getElementById('modal-stars').classList.remove('hidden');
+                
+                const btn = document.getElementById('modal-btn');
+                if (currentLevel.id === 25) {
+                    btn.innerText = "🏆 TAMAT! LIHAT LEADERBOARD";
+                    btn.onclick = () => { closeModal(); showLeaderboard(); };
+                } else {
+                    btn.innerText = "NEXT LEVEL ➡️";
+                    btn.onclick = () => { closeModal(); showScreen('screen-map'); };
+                }
+
+                document.getElementById('modal-alert').classList.remove('hidden');
+            }
+
+            function showAlert(title, desc) {
+                document.getElementById('modal-icon').innerText = title.includes('💥') ? "💥" : (title.includes('💡') ? "💡" : "⚠️");
+                document.getElementById('modal-title').innerText = title;
+                document.getElementById('modal-desc').innerText = desc;
+                document.getElementById('modal-stars').classList.add('hidden');
+                
+                const btn = document.getElementById('modal-btn');
+                btn.innerText = "COBA LAGI";
+                btn.onclick = () => { closeModal(); resetLevel(); };
+                
+                document.getElementById('modal-alert').classList.remove('hidden');
+            }
+
+            function closeModal() {
+                document.getElementById('modal-alert').classList.add('hidden');
+            }
+
+            /* -------------------------------------------------------------------------- */
+            /* LEADERBOARD GLOBAL                           */
+            /* -------------------------------------------------------------------------- */
+            function showLeaderboard() {
+                showScreen('screen-leaderboard');
+            }
+
+            function renderLeaderboardUI() {
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = '';
+                
+                let dataset = globalCloudUsers.length > 0 ? globalCloudUsers : users;
+                document.getElementById('sync-status').innerText = "Data tersinkronisasi. ✔️";
+                
+                let sorted = [...dataset].sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return b.stars - a.stars;
+                });
+
+                if (sorted.length === 0) {
+                    list.innerHTML = `<div class="text-center text-gray-500 py-8 font-bold">Belum ada data pemain.</div>`;
+                    return;
+                }
+
+                sorted.slice(0, 15).forEach((u, index) => { // Tampilkan top 15
+                    let badge = `${index + 1}`;
+                    if(index === 0) badge = "🥇";
+                    if(index === 1) badge = "🥈";
+                    if(index === 2) badge = "🥉";
+
+                    let isMe = currentUser && u.id === currentUser.id;
+
+                    const row = document.createElement('div');
+                    row.className = `flex items-center justify-between p-4 rounded-xl border-2 transition ${isMe ? 'bg-blue-50 border-blue-400 shadow-md transform scale-[1.02]' : 'bg-gray-50 border-gray-100'}`;
+                    
+                    row.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="text-3xl font-black w-10 text-center text-gray-700">${badge}</div>
+                            <div>
+                                <div class="font-bold text-gray-800 text-lg uppercase tracking-wide">${u.name} ${isMe ? '<span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full ml-2 shadow-sm">KAMU</span>' : ''}</div>
+                                <div class="text-sm font-semibold text-gray-500">Kelas ${u.class} | Max Level ${u.maxLevel > 25 ? 25 : u.maxLevel}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-black text-blue-600 text-xl">${u.score} pts</div>
-                        <div class="text-sm font-bold text-yellow-500 drop-shadow-sm">⭐ ${u.stars}</div>
-                    </div>
-                `;
-                list.appendChild(row);
-            });
-        }
-
-        function showTeacherLogin() {
-            document.getElementById('input-pin').value = '';
-            document.getElementById('modal-pin').classList.remove('hidden');
-        }
-
-        function verifyTeacherPin() {
-            const pin = document.getElementById('input-pin').value;
-            if (pin === '1234') { // PIN Guru Default
-                closeModal();
-                showScreen('screen-teacher');
-            } else {
-                closeModal();
-                showAlert("⚠️ PIN SALAH", "PIN guru yang Anda masukkan salah.");
-            }
-        }
-
-        function renderTeacherData() {
-            const tbody = document.getElementById('teacher-table-body');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            
-            let sorted = [...users].sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                return b.stars - a.stars;
-            });
-            
-            if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-gray-500 font-bold">Belum ada data siswa di database.</td></tr>`;
-                return;
+                        <div class="text-right">
+                            <div class="font-black text-blue-600 text-xl">${u.score} pts</div>
+                            <div class="text-sm font-bold text-yellow-500 drop-shadow-sm">⭐ ${u.stars}</div>
+                        </div>
+                    `;
+                    list.appendChild(row);
+                });
             }
 
-            sorted.forEach((u, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-purple-50 transition cursor-default border-b";
-                tr.innerHTML = `
-                    <td class="p-4 font-bold text-gray-700">#${index + 1}</td>
-                    <td class="p-4 font-bold text-blue-700 uppercase">${u.name}</td>
-                    <td class="p-4 text-gray-600 font-medium">${u.class}</td>
-                    <td class="p-4 text-gray-600 font-bold">${u.maxLevel > 25 ? 25 : u.maxLevel}</td>
-                    <td class="p-4 font-bold text-green-600">${u.score}</td>
-                    <td class="p-4 text-yellow-500 font-bold">⭐ ${u.stars}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+            /* -------------------------------------------------------------------------- */
+            /* TEACHER DASHBOARD LOGIC (CSV EXPORT & VIEW)  */
+            /* -------------------------------------------------------------------------- */
+            function openTeacherAccess() {
+                const pin = prompt("Masukkan PIN Guru (Contoh/Default: 1234)");
+                if (pin === "1234") {
+                    showScreen('screen-teacher');
+                    fetchLeaderboardData(); // Panggil fetch baru saat dibuka
+                    renderTeacherDashboard();
+                } else if (pin !== null) {
+                    alert("PIN Salah! Akses ditolak.");
+                }
+            }
 
-        function downloadCSV() {
-            let csv = "Rank,Nama Siswa,Kelas,Max Level,Skor,Bintang\n";
-            let sorted = [...users].sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                return b.stars - a.stars;
-            });
-            
-            sorted.forEach((u, idx) => {
-                const finalMaxLvl = u.maxLevel > 25 ? 25 : u.maxLevel;
-                csv += `${idx+1},"${u.name}","${u.class}",${finalMaxLvl},${u.score},${u.stars}\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Rekap_Nilai_RoadToSchool_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+            function renderTeacherDashboard() {
+                const tbody = document.getElementById('teacher-table-body');
+                tbody.innerHTML = '';
+                
+                let dataset = globalCloudUsers.length > 0 ? globalCloudUsers : users;
+                
+                let sorted = [...dataset].sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return b.stars - a.stars;
+                });
+                
+                if(sorted.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Belum ada data siswa.</td></tr>`;
+                    return;
+                }
 
-        // Ekspos ke global namespace
-        window.startGame = startGame;
-        window.logout = logout;
-        window.showScreen = showScreen;
-        window.initLevel = initLevel;
-        window.addBlock = addBlock;
-        window.removeBlock = removeBlock;
-        window.resetLevel = resetLevel;
-        window.useHint = useHint;
-        window.runAlgorithm = runAlgorithm;
-        window.closeModal = closeModal;
-        window.showLeaderboard = showLeaderboard;
-        window.showTeacherLogin = showTeacherLogin;
-        window.verifyTeacherPin = verifyTeacherPin;
-        window.downloadCSV = downloadCSV;
+                sorted.forEach((u, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-800 transition";
+                    tr.innerHTML = `
+                        <td class="p-4 font-bold text-gray-400">#${index + 1}</td>
+                        <td class="p-4 font-bold text-blue-300 uppercase">${u.name}</td>
+                        <td class="p-4">${u.class}</td>
+                        <td class="p-4">Level ${u.maxLevel > 25 ? 25 : u.maxLevel}</td>
+                        <td class="p-4 font-bold text-green-400">${u.score}</td>
+                        <td class="p-4">⭐ ${u.stars}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
 
-    </script>
-</body>
-</html>
+            function downloadCSV() {
+                let dataset = globalCloudUsers.length > 0 ? globalCloudUsers : users;
+                if(dataset.length === 0) {
+                    alert("Tidak ada data untuk diunduh.");
+                    return;
+                }
+                
+                let csvContent = "data:text/csv;charset=utf-8,";
+                // Header baris pertama
+                csvContent += "Rank,Nama Siswa,Kelas,Max Level,Total Score,Total Stars\n";
+                
+                let sorted = [...dataset].sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return b.stars - a.stars;
+                });
+
+                sorted.forEach((u, index) => {
+                    let row = `${index+1},"${u.name}","${u.class}",${u.maxLevel > 25 ? 25 : u.maxLevel},${u.score},${u.stars}`;
+                    csvContent += row + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Rekap_Nilai_RoadToSchool_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+        </script>
+    </body>
+    </html>
