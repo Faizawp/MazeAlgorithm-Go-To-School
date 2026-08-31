@@ -90,6 +90,7 @@
             <div class="text-6xl mb-4 animate-bounce">🚗</div>
             <h1 class="text-3xl font-bold text-gray-800 mb-2">ROAD TO SCHOOL</h1>
             <p class="text-gray-500 mb-6 font-medium">"Susun Algoritmanya, Sampai ke Sekolah!"</p>
+            <p class="text-gray-500 mb-6 font-medium">Created By : Muhammad Faiz Al Hafizh Winof Putra, S.Pd</p>
             
             <!-- Welcome Back Notification -->
             <div id="welcome-back" class="hidden mb-4 p-4 bg-green-100 rounded-xl border border-green-300">
@@ -330,8 +331,8 @@
         // S = Start, F = Finish, . = Jalan, W = Tembok/Pohon, B = Barikade(🚧), C = Checkpoint(📍), E = Bensin(⛽)
         const LEVELS = [
             // WORLD 1: MORNING ROUTE
-            { id: 1, world: 1, title: "First Day", desc: "Maju lurus ke sekolah.", size: 4, grid: ["S...", "W.WW", "W.WW", "W..F"], opt: 3, energy: 99 },
-            { id: 2, world: 1, title: "Turn Right", desc: "Belok kanan di persimpangan.", size: 5, grid: ["SWWWW", ".WWWW", "...WW", "WW.WW", "WW..F"], opt: 6, energy: 99 },
+            { id: 1, world: 1, title: "First Day", desc: "Maju lurus ke sekolah.", size: 4, grid: ["S...", "W.WW", "W.WW", "W..F"], opt: 6, energy: 99 },
+            { id: 2, world: 1, title: "Turn Right", desc: "Belok kanan di persimpangan.", size: 5, grid: ["SWWWW", ".WWWW", "...WW", "WW.WW", "WW..F"], opt: 8, energy: 99 },
             { id: 3, world: 1, title: "Turn Left", desc: "Gunakan belok kiri dan kanan.", size: 5, grid: ["SWWWW", ".WWWW", "....W", "WWW.W", "WW..F"], opt: 8, energy: 99 },
             { id: 4, world: 1, title: "Wrong Road", desc: "Awas masuk jalan buntu!", size: 5, grid: ["S.WWW", "W...W", "WWW.W", "W...W", "W.W.F"], opt: 8, energy: 99 },
             { id: 5, world: 1, title: "School Gate", desc: "Rencanakan rute terpendek.", size: 6, grid: ["S.WWWW", "W....W", "WWWW.W", "W....W", "W.WWWW", "W....F"], opt: 11, energy: 99 },
